@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Math Grid Game</title>
+    <style>
+    body {
+      margin: 0;
+      padding: 40px 0 0 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #121212;
+      color: #f0f0f0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .grid-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr; /* Left, Center (wider), Right */
+      grid-template-rows: repeat(3, auto); /* 3 rows per column */
+      gap: 10px;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .container {
+      background: #1e1e1e;
+      border: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+    .center-grid {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      gap: 2px;
+      padding: 4px;
+      background: #2a2a2a;
+      border: 2px solid #444;
+    }
+    .center-grid {
+      aspect-ratio: 1 / 1;
+    }
+    /* Base button style for all cells */
+    .cell {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      font-size: 18px;
+      color: #fff;
+      transition: all 0.2s ease;
+      position: relative;
+      cursor: pointer;
+      /* Raised minesweeper button look */
+      border-top: 3px solid #7a7a7a;
+      border-left: 3px solid #7a7a7a;
+      border-right: 3px solid #3a3a3a;
+      border-bottom: 3px solid #3a3a3a;
+      background: linear-gradient(135deg, #5a5a5a 0%, #4a4a4a 50%, #3a3a3a 100%);
+    }
+    
+    /* Factor cells - slightly different coloring but same button structure */
+    .cell.factor {
+      background: linear-gradient(135deg, #4a5a5a 0%, #3a4a4a 50%, #2a3a3a 100%);
+      color: #00ffff;
+      text-shadow: 0 0 3px #00ffff60;
+    }
+    
+    /* Null cell (top-left) - same as products */
+    .cell.null {
+      background: linear-gradient(135deg, #5a5a5a 0%, #4a4a4a 50%, #3a3a3a 100%);
+      color: #fff;
+    }
+    
+    /* Input styling for hidden cells */
+    .cell input {
+      width: 100%;
+      height: 100%;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      border: none;
+      background: transparent;
+      color: inherit;
+      outline: none;
+    }
+
+    /* Pressed state for cells in active equation (non-active cells) */
+    .cell.highlight {
+      border-top: 2px solid #2a2a2a;
+      border-left: 2px solid #2a2a2a;
+      border-right: 2px solid #5a5a5a;
+      border-bottom: 2px solid #5a5a5a;
+      background: linear-gradient(135deg, #3a3a3a 0%, #4a4a4a 50%, #5a5a5a 100%);
+      transform: translateY(1px);
+    }
+    
+    /* Factor cells when pressed */
+    .cell.factor.highlight {
+      background: linear-gradient(135deg, #2a3a3a 0%, #3a4a4a 50%, #4a5a5a 100%);
+      color: #00cccc;
+    }
+
+    /* Deep pressed state for the active cell */
+    .cell.active-cell {
+      border-top: 2px solid #1a1a1a;
+      border-left: 2px solid #1a1a1a;
+      border-right: 2px solid #6a6a6a;
+      border-bottom: 2px solid #6a6a6a;
+      background: linear-gradient(135deg, #2a2a2a 0%, #3a3a3a 50%, #4a4a4a 100%);
+      transform: translateY(2px);
+      box-shadow: inset 0 0 8px #00000040;
+    }
+    
+    /* Factor cells when active */
+    .cell.factor.active-cell {
+      background: linear-gradient(135deg, #1a2a2a 0%, #2a3a3a 50%, #3a4a4a 100%);
+      color: #00aaaa;
+    }
+
+        /* Single factor cell selection (waiting for equation activation) */
+    .cell.factor-selected {
+      border-top: 2px solid #1a2a2a;
+      border-left: 2px solid #1a2a2a;
+      border-right: 2px solid #6a6a6a;
+      border-bottom: 2px solid #6a6a6a;
+      background: linear-gradient(135deg, #1a2a2a 0%, #2a3a3a 50%, #3a4a4a 100%);
+      color: #00ffff;
+      text-shadow: 0 0 5px #00ffff80;
+      box-shadow: 0 0 8px #00ffff40, inset 0 0 8px #00000040;
+      transform: translateY(2px);
+    }
+
+    /* Ensure factor-selected always gets pressed-in effect regardless of other classes */
+    .cell.factor.factor-selected {
+      border-top: 2px solid #1a2a2a !important;
+      border-left: 2px solid #1a2a2a !important;
+      border-right: 2px solid #6a6a6a !important;
+      border-bottom: 2px solid #6a6a6a !important;
+      background: linear-gradient(135deg, #1a2a2a 0%, #2a3a3a 50%, #3a4a4a 100%) !important;
+      transform: translateY(2px) !important;
+    }
+
+    /* Validation states */
+    .cell.correct {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 50%, #17a2b8 100%) !important;
+      border-top: 3px solid #6ea86e;
+      border-left: 3px solid #6ea86e;
+      border-right: 3px solid #1e7e34;
+      border-bottom: 3px solid #1e7e34;
+      box-shadow: inset 0 0 10px #ffffff30;
+      text-shadow: 0 0 5px #ffffff80;
+    } 
+    .cell.incorrect {
+      background: linear-gradient(135deg, #dc3545 0%, #e74c3c 50%, #c0392b 100%) !important;
+      border-top: 3px solid #e57373;
+      border-left: 3px solid #e57373;
+      border-right: 3px solid #a71d2a;
+      border-bottom: 3px solid #a71d2a;
+      box-shadow: inset 0 0 10px #ffffff30;
+      text-shadow: 0 0 5px #ffffff80;
+    }
+
+    .controls {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .difficulty-selector {
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    .difficulty-line {
+      width: 120px;
+      height: 2px;
+      background: #00ffff;
+      position: relative;
+      margin: 0 10px;
+    }
+    .difficulty-dot {
+      width: 14px;
+      height: 14px;
+      background: #555;
+      border-radius: 50%;
+      position: absolute;
+      top: -6px;
+      cursor: pointer;
+    }
+    .difficulty-dot.active {
+      background: #00ffff;
+    }
+    .dot-left { left: 0; }
+    .dot-center { left: 50%; transform: translateX(-50%); }
+    .dot-right { right: 0; }
+    .difficulty-label {
+      font-size: 14px;
+      height: 16px;
+      color: #00ffff;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 14px;
+      cursor: pointer;
+      background: #00ffff;
+      color: #121212;
+      border: none;
+      margin: 0 5px;
+      font-weight: bold;
+      border-radius: 6px;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #00cccc;
+    }
+
+    .button-active {
+      background: #009999;
+    }
+
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 45px;
+      background: #00ffff;
+      color: #121212;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-sizing: border-box;
+      font-family: 'Arial Black', sans-serif;
+      z-index: 1000;
+      padding: 0 1rem;
+    }
+
+    .nav-title {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .nav-buttons .nav-btn {
+      background: #121212;
+      color: #00ffff;
+      margin-left: 10px;
+      border: 2px solid #00ffff;
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    .nav-buttons .nav-btn:hover {
+      background: #00cccc;
+      border-color: #00cccc;
+      color: #121212;
+    }
+
+    .game-wrapper {
+      padding-top: 60px; /* add this so it’s not hidden under navbar */
+    }
+
+    .equation-display {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      grid-template-rows: 1fr;
+      gap: 8px;
+      align-items: center;
+      justify-items: center;
+      font-size: 20px;
+      color: #fff;
+      width: 100%;
+      height: 100%;
+      padding: 12px;
+      box-sizing: border-box;
+    }
+    
+    .eq-box {
+      width: 40px;
+      height: 40px;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      border: none;
+      outline: none;
+      
+      /* Match grid cell styling */
+      border-top: 3px solid #7a7a7a;
+      border-left: 3px solid #7a7a7a;
+      border-right: 3px solid #3a3a3a;
+      border-bottom: 3px solid #3a3a3a;
+      background: linear-gradient(135deg, #5a5a5a 0%, #4a4a4a 50%, #3a3a3a 100%);
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .eq-operator {
+      font-weight: bold;
+      color: #00ffff;
+      font-size: 20px;
+    }
+
+    .cell.selected {
+      outline: 3px solid #00ffff;
+      outline-offset: -2px;
+      background: linear-gradient(135deg, #004444 0%, #006666 50%, #008888 100%) !important;
+      border-top: 3px solid #00aaaa;
+      border-left: 3px solid #00aaaa;
+      border-right: 3px solid #004444;
+      border-bottom: 3px solid #004444;
+      box-shadow: inset 0 0 10px #00ffff40;
+    }
+
+    @keyframes pulse {
+      0% { 
+        box-shadow: 0 0 5px #00ffff, inset 0 0 8px #00ffff30;
+        border-top: 3px solid #008888;
+        border-left: 3px solid #008888;
+      }
+      50% { 
+        box-shadow: 0 0 15px #00ffff, inset 0 0 12px #00ffff40;
+        border-top: 3px solid #00aaaa;
+        border-left: 3px solid #00aaaa;
+      }
+      100% { 
+        box-shadow: 0 0 5px #00ffff, inset 0 0 8px #00ffff30;
+        border-top: 3px solid #008888;
+        border-left: 3px solid #008888;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-title">MULTIPLOKU</div>
+    <div class="nav-buttons">
+      <button class="nav-btn">SCORECARD</button>
+      <button class="nav-btn">CHALLENGE</button>
+    </div>
+  </nav>
+
+  <div class="game-wrapper">
+    <div class="grid-container">
+      <!-- Left Column -->
+      <div class="container"></div>
+      <div class="container"></div>
+      <div class="container"></div>
+
+      <!-- Center Column - GRID spans all 3 rows -->
+      <div class="container" id="puzzle-container" style="grid-column: 2; grid-row: 1 / span 3;">
+        <div class="center-grid" id="game-grid"></div>
+      </div>
+
+      <!-- Right Column -->
+      <div class="container">
+        <div class="equation-display">
+          <input id="eq-left" type="text" class="eq-box"> x
+          <input id="eq-right" type="text" class="eq-box"> =
+          <input id="eq-result" type="text" class="eq-box">
+        </div>
+      </div>
+      <div class="container"></div>
+      <div class="container"></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="difficulty-selector">
+      <div class="difficulty-line">
+        <div class="difficulty-dot dot-left active" onclick="setDifficulty('beginner')"></div>
+        <div class="difficulty-dot dot-center" onclick="setDifficulty('confident')"></div>
+        <div class="difficulty-dot dot-right" onclick="setDifficulty('advanced')"></div>
+      </div>
+    </div>
+    <div class="difficulty-label" id="difficulty-label">Beginner</div>
+    <div>
+      <button onclick="generateGrid(currentDifficulty)">Start / New Game</button>
+      <button id="checkBtn" onclick="toggleValidation()">Check Answers</button>
+    </div>
+  </div>
+
+  <script>
+    // Global variables
+    let validationActive = false;
+    let cellElements = [];
+    let currentDifficulty = 'beginner';
+    let selectedCells = [];
+    let activeCellInEquation = null; // Track which cell in the equation is the "active" one
+    let equations = [];
+
+    // --- Utility Functions ---
+    function getRowCol(cell) {
+      const index = [...cell.parentNode.children].indexOf(cell);
+      return {
+        row: Math.floor(index / 4),
+        col: index % 4,
+        index: index
+      };
+    }
+
+    function getCellAt(grid, row, col) {
+      return grid.children[row * 4 + col];
+    }
+
+    function getValue(cell) {
+      const input = cell.querySelector('input');
+      if (input) return input.value.trim();
+      
+      const { row, col } = getRowCol(cell);
+      const match = cellElements.find(c => c.row === row && c.col === col);
+      return match ? match.value : '';
+    }
+
+    function isProductCell(cell) {
+      const { row, col } = getRowCol(cell);
+      return row > 0 && col > 0;
+    }
+
+    function isFactorCell(cell) {
+      const { row, col } = getRowCol(cell);
+      return (row === 0 && col > 0) || (row > 0 && col === 0);
+    }
+
+    function isCellVisible(cell) {
+      return !cell.classList.contains('hidden');
+    }
+
+    function findEquationWithCell(cell) {
+      return equations.find(eq => 
+        eq.rowFactor === cell || eq.colFactor === cell || eq.product === cell
+      );
+    }
+
+    function findSharedEquation(cell1, cell2) {
+      return equations.find(eq => {
+        const cells = [eq.rowFactor, eq.colFactor, eq.product];
+        return cells.includes(cell1) && cells.includes(cell2);
+      });
+    }
+
+    function isEquationActive() {
+      return selectedCells.length > 0;
+    }
+
+    function getActiveEquation() {
+      if (!isEquationActive()) return null;
+      // Find the equation that contains all selected cells
+      return equations.find(eq => {
+        const eqCells = [eq.rowFactor, eq.colFactor, eq.product];
+        return selectedCells.every(cell => eqCells.includes(cell));
+      });
+    }
+
+    // --- Difficulty Management ---
+    function setDifficulty(level) {
+      currentDifficulty = level;
+      const label = document.getElementById('difficulty-label');
+      if (label) {
+        label.textContent = level.charAt(0).toUpperCase() + level.slice(1);
+      }
+      document.querySelectorAll('.difficulty-dot').forEach(dot => dot.classList.remove('active'));
+      const map = {
+        beginner: '.dot-left',
+        confident: '.dot-center',
+        advanced: '.dot-right'
+      };
+      document.querySelector(map[level]).classList.add('active');
+    }
+
+    // --- Grid Generation ---
+    function getRandomFactors(count) {
+      const nums = Array.from({ length: 9 }, (_, i) => i + 1);
+      for (let i = nums.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [nums[i], nums[j]] = [nums[j], nums[i]];
+      }
+      return nums.slice(0, count);
+    }
+
+    function generateGrid(difficulty = 'beginner') {
+      const grid = document.getElementById('game-grid');
+      grid.innerHTML = '';
+      cellElements = [];
+
+      const settings = {
+        beginner: { hideTotal: 4 },
+        confident: { hideTotal: 6 },
+        advanced: { hideTotal: 9 }
+      }[difficulty];
+
+      const topFactors = getRandomFactors(3);
+      const leftFactors = getRandomFactors(3);
+
+      // Create grid cells
+      for (let row = 0; row < 4; row++) {
+        for (let col = 0; col < 4; col++) {
+          const cell = document.createElement('div');
+          cell.classList.add('cell');
+          let value = '';
+
+          if (row === 0 && col === 0) {
+            cell.classList.add('null');
+            value = 'X';
+          } else if (row === 0) {
+            cell.classList.add('factor');
+            value = topFactors[col - 1];
+          } else if (col === 0) {
+            cell.classList.add('factor');
+            value = leftFactors[row - 1];
+          } else {
+            value = topFactors[col - 1] * leftFactors[row - 1];
+          }
+
+          cell.textContent = value;
+          grid.appendChild(cell);
+          cellElements.push({ element: cell, value: value.toString(), row, col });
+        }
+      }
+
+      // Define equations after grid is created
+      defineEquations(grid);
+
+      // Hide cells strategically
+      hideCellsStrategically(settings.hideTotal);
+    }
+
+    function defineEquations(grid) {
+      equations = [];
+      for (let r = 1; r < 4; r++) {
+        for (let c = 1; c < 4; c++) {
+          const rowFactor = getCellAt(grid, r, 0);
+          const colFactor = getCellAt(grid, 0, c);
+          const product = getCellAt(grid, r, c);
+          equations.push({ row: r, col: c, rowFactor, colFactor, product });
+        }
+      }
+    }
+
+    function hideCellsStrategically(targetHidden) {
+      const hiddenSet = new Set();
+      const shuffledEquations = [...equations].sort(() => 0.5 - Math.random());
+      
+      for (let eq of shuffledEquations) {
+        if (hiddenSet.size >= targetHidden) break;
+        
+        const candidates = [eq.rowFactor, eq.colFactor, eq.product];
+        const availableCandidates = candidates.filter(cell => {
+          const { row, col } = getRowCol(cell);
+          const index = row * 4 + col;
+          return !hiddenSet.has(index) && !(row === 0 && col === 0);
+        });
+        
+        if (availableCandidates.length > 0) {
+          const hideCount = Math.min(
+            Math.random() < 0.6 ? 1 : 2, 
+            availableCandidates.length,
+            targetHidden - hiddenSet.size
+          );
+          
+          const toHide = availableCandidates
+            .sort(() => 0.5 - Math.random())
+            .slice(0, hideCount);
+          
+          for (let cell of toHide) {
+            const { row, col } = getRowCol(cell);
+            const index = row * 4 + col;
+            hiddenSet.add(index);
+          }
+        }
+      }
+
+      // Apply hiding to cells
+      hiddenSet.forEach(index => {
+        const obj = cellElements[index];
+        const cell = obj.element;
+        if (cell) {
+          cell.classList.add('hidden');
+          cell.innerHTML = '<input type="text" maxlength="5">';
+          const input = cell.querySelector('input');
+
+          input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              input.blur();
+              validateSingleCell(cell);
+            } else if (e.key === 'Backspace' || e.key === 'Delete') {
+              e.preventDefault();
+              input.value = '';
+            }
+          });
+
+          input.addEventListener('input', () => {
+            if (validationActive) {
+              validateSingleCell(cell);
+            }
+          });
+        }
+      });
+    }
+
+    // --- Validation ---
+    function validateSingleCell(cell) {
+      const { row, col } = getRowCol(cell);
+      const obj = cellElements.find(c => c.row === row && c.col === col);
+      const input = cell.querySelector('input');
+      
+      if (!input || !obj) return;
+
+      cell.classList.remove('correct', 'incorrect');
+      
+      if (validationActive && input.value.trim() !== '') {
+        if (input.value.trim() === obj.value) {
+          cell.classList.add('correct');
+        } else {
+          cell.classList.add('incorrect');
+        }
+      }
+    }
+
+    function toggleValidation() {
+      const button = document.getElementById('checkBtn');
+      validationActive = !validationActive;
+      button.classList.toggle('button-active', validationActive);
+      button.textContent = validationActive ? 'Hide Feedback' : 'Check Answers';
+
+      for (const obj of cellElements) {
+        const cell = obj.element;
+        if (cell.classList.contains('hidden')) {
+          validateSingleCell(cell);
+        }
+      }
+    }
+
+    // --- Product Cell Click Handler ---
+    function handleProductCellClick(cell, isCommandClick = false) {
+      if (isCommandClick) {
+        handleCommandClickOnProduct(cell);
+        return;
+      }
+
+      const eq = equations.find(eq => eq.product === cell);
+      if (!eq) return;
+
+      // Check if this equation is already active
+      const activeEq = getActiveEquation();
+      const isSameEquation = activeEq && activeEq.product === eq.product;
+
+      if (isSameEquation) {
+        // Same equation clicked - handle input focus
+        setActiveCell(cell);
+        if (!isCellVisible(cell)) {
+          const input = cell.querySelector('input');
+          if (input) {
+            input.focus();
+            setTimeout(() => {
+              if (input.value) {
+                input.setSelectionRange(input.value.length, input.value.length);
+              }
+            }, 10);
+          }
+        }
+      } else {
+        // New equation - clear previous and activate new
+        clearAllSelections();
+        activateEquation(eq);
+        setActiveCell(cell);
+        
+        if (!isCellVisible(cell)) {
+          const input = cell.querySelector('input');
+          if (input) {
+            setTimeout(() => input.focus(), 50);
+          }
+        }
+      }
+    }
+
+    function handleCommandClickOnProduct(clickedCell) {
+      // Check if an equation is active
+      if (isEquationActive()) {
+        const activeEq = getActiveEquation();
+        
+        // Check if clickedCell is part of the active equation
+        const isPartOfActiveEq = activeEq && 
+          [activeEq.rowFactor, activeEq.colFactor, activeEq.product].includes(clickedCell);
+        
+        if (isPartOfActiveEq) {
+          // Move active cell highlight to clickedCell
+          setActiveCell(clickedCell);
+          
+          if (!isCellVisible(clickedCell)) {
+            // Focus the input if it's hidden
+            const input = clickedCell.querySelector('input');
+            if (input) {
+              setTimeout(() => input.focus(), 10);
+            }
+          }
+        } else {
+          // Block - cannot share equation with another product
+          // Do nothing, leave everything as it was
+          return;
+        }
+      } else {
+        // No equation is active
+        // Check if there's another active cell that's a factor
+        if (activeCellInEquation && isFactorCell(activeCellInEquation)) {
+          // Check if the active factor shares an equation with clickedCell
+          const sharedEq = findSharedEquation(activeCellInEquation, clickedCell);
+          
+          if (sharedEq) {
+            // Activate the shared equation
+            activateEquation(sharedEq);
+            setActiveCell(clickedCell);
+            
+            if (!isCellVisible(clickedCell)) {
+              const input = clickedCell.querySelector('input');
+              if (input) {
+                setTimeout(() => input.focus(), 10);
+              }
+            }
+          } else {
+            // Block - cannot share equation
+            return;
+          }
+        } else {
+          // Block - no valid factor to share equation with
+          return;
+        }
+      }
+    }
+
+    function handleFactorCellClick(cell, isCommandClick = false) {
+      if (isCommandClick) {
+        handleCommandClickOnFactor(cell);
+        return;
+      }
+
+      // Check if there's currently an active equation
+      const activeEq = getActiveEquation();
+      
+      if (activeEq) {
+        // Check if this factor is part of the currently active equation
+        const isPartOfActiveEq = [activeEq.rowFactor, activeEq.colFactor, activeEq.product].includes(cell);
+        
+        if (isPartOfActiveEq) {
+          // YES - factor is in active equation
+          if (isCellVisible(cell)) {
+            // YES - factor is visible: same highlight logic as clicking visible product
+            setActiveCell(cell);
+          } else {
+            // NO - factor is hidden: same highlight/cursor logic as clicking hidden product
+            setActiveCell(cell);
+            const input = cell.querySelector('input');
+            if (input) {
+              input.focus();
+              setTimeout(() => {
+                if (input.value) {
+                  input.setSelectionRange(input.value.length, input.value.length);
+                }
+              }, 10);
+            }
+          }
+          return;
+        } else {
+          // NO - factor is not in active equation
+          // Idle/deactivate the previously active equation
+          clearAllSelections();
+          // Do not activate any equation - just highlight the clicked factor
+          highlightSingleFactor(cell);
+          return;
+        }
+      } else {
+        // NO - no equation is active
+        // Activate that factor cell only, waiting for command-click
+        highlightSingleFactor(cell);
+        return;
+      }
+    }
+
+    function handleCommandClickOnFactor(clickedCell) {
+      // For factors, command-click behavior is similar to regular click
+      // but we need to be careful about equation selection
+      const eq = findEquationWithCell(clickedCell);
+      if (!eq) return;
+
+      if (isEquationActive()) {
+        const activeEq = getActiveEquation();
+        const isPartOfActiveEq = activeEq && activeEq === eq;
+        
+        if (isPartOfActiveEq) {
+          setActiveCell(clickedCell);
+          if (!isCellVisible(clickedCell)) {
+            const input = clickedCell.querySelector('input');
+            if (input) {
+              setTimeout(() => input.focus(), 10);
+            }
+          }
+        } else {
+          // Different equation - activate new one
+          clearAllSelections();
+          activateEquation(eq);
+          setActiveCell(clickedCell);
+          
+          if (!isCellVisible(clickedCell)) {
+            const input = clickedCell.querySelector('input');
+            if (input) {
+              setTimeout(() => input.focus(), 50);
+            }
+          }
+        }
+      } else {
+        // No equation active - just activate this one
+        activateEquation(eq);
+        setActiveCell(clickedCell);
+        
+        if (!isCellVisible(clickedCell)) {
+          const input = clickedCell.querySelector('input');
+          if (input) {
+            setTimeout(() => input.focus(), 50);
+          }
+        }
+      }
+    }
+
+    function clearAllSelections() {
+      selectedCells.forEach(cell => {
+        cell.classList.remove('selected', 'highlight', 'active-cell');
+      });
+      
+      // Also clear any single factor selections
+      document.querySelectorAll('.factor-selected').forEach(cell => {
+        cell.classList.remove('factor-selected');
+      });
+      
+      selectedCells = [];
+      activeCellInEquation = null;
+      
+      document.getElementById('eq-left').value = '';
+      document.getElementById('eq-right').value = '';
+      document.getElementById('eq-result').value = '';
+    }
+
+    function activateEquation(eq) {
+      selectedCells = [eq.rowFactor, eq.colFactor, eq.product];
+      
+      // Apply highlight to all cells in equation
+      selectedCells.forEach(cell => {
+        cell.classList.add('highlight');
+      });
+
+      // Populate equation display
+      document.getElementById('eq-left').value = getValue(eq.rowFactor);
+      document.getElementById('eq-right').value = getValue(eq.colFactor);
+      document.getElementById('eq-result').value = getValue(eq.product);
+    }
+
+    function setActiveCell(cell) {
+      // Remove active-cell class from all cells
+      selectedCells.forEach(c => c.classList.remove('active-cell'));
+      
+      // Add active-cell class to the new active cell
+      cell.classList.add('active-cell');
+      activeCellInEquation = cell;
+      
+      // Update other cells in equation to have less intense highlight
+      selectedCells.forEach(c => {
+        if (c !== cell) {
+          c.classList.remove('active-cell');
+          c.classList.add('highlight');
+        }
+      });
+    }
+
+    function highlightSingleFactor(cell) {
+      clearAllSelections();
+      cell.classList.add('factor-selected');
+      activeCellInEquation = cell;
+      
+      if (!isCellVisible(cell)) {
+        const input = cell.querySelector('input');
+        if (input) {
+          setTimeout(() => input.focus(), 10);
+        }
+      }
+    }
+
+    // --- Event Listeners ---
+    document.addEventListener('DOMContentLoaded', () => {
+      const grid = document.getElementById('game-grid');
+      
+      grid.addEventListener('click', (e) => {
+        let target = e.target;
+        if (target.tagName === 'INPUT') target = target.parentElement;
+        const cell = target.closest('.cell');
+        
+        if (!cell) return;
+        
+        const isCommandClick = e.ctrlKey || e.metaKey;
+        
+        if (isProductCell(cell)) {
+          handleProductCellClick(cell, isCommandClick);
+        } else if (isFactorCell(cell)) {
+          handleFactorCellClick(cell, isCommandClick);
+        }
+      });
+
+      // Initialize game
+      setDifficulty('beginner');
+      generateGrid('beginner');
+    });
+  </script>
+</body>
+</html>
