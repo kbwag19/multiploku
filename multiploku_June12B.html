@@ -314,22 +314,46 @@
       font-size: 20px;
     }
 
+    #visual-container {
+      min-height: 300px;
+    }
     .eq-visual {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
+      justify-content: center;
+      gap: 16px;
       color: #00ffff;
       font-size: 14px;
       word-break: break-all;
     }
-    .eq-visual .dot-row {
-      font-family: monospace;
-      line-height: 1;
+    .eq-visual .object-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin: 8px 0;
+      padding: 6px;
+      border-radius: 50%;
+      animation: circleAnim 2s linear infinite;
+      animation-play-state: paused;
+    }
+    #visual-container:hover .object-group {
+      animation-play-state: running;
+    }
+    .eq-visual .object {
+      font-size: 24px;
     }
     .eq-visual .or-label {
-      font-weight: bold;
+      font-weight: 900;
       margin: 4px 0;
+      font-size: 24px;
+      font-family: "Comic Sans MS", "Comic Neue", cursive, sans-serif;
+      color: #ff66ff;
+    }
+    @keyframes circleAnim {
+      0% { box-shadow: 0 0 0 0 #00ffff40; }
+      50% { box-shadow: 0 0 0 6px #00ffff80; }
+      100% { box-shadow: 0 0 0 0 #00ffff40; }
     }
 
     .cell.selected {
@@ -409,9 +433,21 @@
     let validationActive = false;
     let cellElements = [];
     let currentDifficulty = 'beginner';
-    let selectedCells = [];
-    let activeCellInEquation = null; // Track which cell in the equation is the "active" one
-    let equations = [];
+      let selectedCells = [];
+      let activeCellInEquation = null; // Track which cell in the equation is the "active" one
+      let equations = [];
+
+      const objectMap = {
+        1: '👽',
+        2: '👾',
+        3: '🪼',
+        4: '🐸',
+        5: '🐵',
+        6: '🐷',
+        7: '🐼',
+        8: '🦊',
+        9: '🐙'
+      };
 
     // --- Utility Functions ---
     function getRowCol(cell) {
@@ -479,32 +515,46 @@
         return;
       }
 
-      container.style.display = 'flex';
-      container.innerHTML = '';
+        container.style.display = 'flex';
+        container.innerHTML = '';
 
-      const topGroup = document.createElement('div');
-      for (let i = 0; i < leftVal; i++) {
-        const row = document.createElement('div');
-        row.className = 'dot-row';
-        row.textContent = '•'.repeat(rightVal);
-        topGroup.appendChild(row);
-      }
+        const topGroup = document.createElement('div');
+        const topEmoji = objectMap[rightVal] || '•';
+        for (let i = 0; i < leftVal; i++) {
+          const group = document.createElement('div');
+          group.className = 'object-group';
+          group.style.animationDelay = `${i * 0.3}s`;
+          for (let j = 0; j < rightVal; j++) {
+            const span = document.createElement('span');
+            span.className = 'object';
+            span.textContent = topEmoji;
+            group.appendChild(span);
+          }
+          topGroup.appendChild(group);
+        }
 
-      const orLabel = document.createElement('div');
-      orLabel.className = 'or-label';
-      orLabel.textContent = 'OR';
+        const orLabel = document.createElement('div');
+        orLabel.className = 'or-label';
+        orLabel.textContent = 'OR';
 
-      const bottomGroup = document.createElement('div');
-      for (let i = 0; i < rightVal; i++) {
-        const row = document.createElement('div');
-        row.className = 'dot-row';
-        row.textContent = '•'.repeat(leftVal);
-        bottomGroup.appendChild(row);
-      }
+        const bottomGroup = document.createElement('div');
+        const bottomEmoji = objectMap[leftVal] || '•';
+        for (let i = 0; i < rightVal; i++) {
+          const group = document.createElement('div');
+          group.className = 'object-group';
+          group.style.animationDelay = `${(leftVal + i) * 0.3}s`;
+          for (let j = 0; j < leftVal; j++) {
+            const span = document.createElement('span');
+            span.className = 'object';
+            span.textContent = bottomEmoji;
+            group.appendChild(span);
+          }
+          bottomGroup.appendChild(group);
+        }
 
-      container.appendChild(topGroup);
-      container.appendChild(orLabel);
-      container.appendChild(bottomGroup);
+        container.appendChild(topGroup);
+        container.appendChild(orLabel);
+        container.appendChild(bottomGroup);
     }
 
     function findEquationWithCell(cell) {
