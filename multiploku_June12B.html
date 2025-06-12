@@ -324,18 +324,8 @@
       box-shadow: inset 0 0 10px #00ffff40;
     }
 
-    .equation-visual {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      font-size: 24px;
-      line-height: 1.2;
-      color: #fff;
-    }
-
     @keyframes pulse {
-      0% {
+      0% { 
         box-shadow: 0 0 5px #00ffff, inset 0 0 8px #00ffff30;
         border-top: 3px solid #008888;
         border-left: 3px solid #008888;
@@ -365,9 +355,7 @@
   <div class="game-wrapper">
     <div class="grid-container">
       <!-- Left Column -->
-      <div class="container">
-        <div id="equation-visual" class="equation-visual"></div>
-      </div>
+      <div class="container"></div>
       <div class="container"></div>
       <div class="container"></div>
 
@@ -864,8 +852,6 @@
       document.getElementById('eq-left').value = '';
       document.getElementById('eq-right').value = '';
       document.getElementById('eq-result').value = '';
-
-      updateEquationVisual(null);
     }
 
     function activateEquation(eq) {
@@ -880,33 +866,6 @@
       document.getElementById('eq-left').value = getValue(eq.rowFactor);
       document.getElementById('eq-right').value = getValue(eq.colFactor);
       document.getElementById('eq-result').value = getValue(eq.product);
-
-      updateEquationVisual(eq);
-    }
-
-    function updateEquationVisual(eq) {
-      const container = document.getElementById('equation-visual');
-      if (!container) return;
-
-      if (!eq) {
-        container.innerHTML = '';
-        return;
-      }
-
-      const left = parseInt(getValue(eq.rowFactor)) || 0;
-      const right = parseInt(getValue(eq.colFactor)) || 0;
-      const result = parseInt(getValue(eq.product)) || 0;
-
-      const aliens = '👾'.repeat(left);
-      const monsters = '👽'.repeat(right);
-      const bosses = '👹'.repeat(result);
-
-      container.innerHTML =
-        `<div>${aliens}</div>` +
-        '<div style="font-weight:bold;">×</div>' +
-        `<div>${monsters}</div>` +
-        '<div style="font-weight:bold;">=</div>' +
-        `<div>${bosses}</div>`;
     }
 
     function setActiveCell(cell) {
