@@ -19,7 +19,7 @@
     }
     .grid-container {
       display: grid;
-      grid-template-columns: 1fr auto 1fr; /* Left visual, center grid, right equation */
+      grid-template-columns: 1.2fr auto 1fr; /* Left visual a bit wider */
       gap: 10px;
       width: 100%;
       max-width: 1000px; /* slightly smaller overall width */
@@ -316,6 +316,7 @@
 
     #visual-container {
       min-height: 300px;
+      min-width: 320px;
     }
     .eq-visual {
       display: flex;
@@ -347,8 +348,15 @@
       font-weight: 900;
       margin: 4px 0;
       font-size: 24px;
-      font-family: "Comic Sans MS", "Comic Neue", cursive, sans-serif;
+      font-family: 'Arial Black', sans-serif;
       color: #ff66ff;
+    }
+
+    .eq-visual .solve-msg {
+      font-family: 'Arial Black', sans-serif;
+      color: #00ffff;
+      font-size: 18px;
+      text-align: center;
     }
     @keyframes circleAnim {
       0% { box-shadow: 0 0 0 0 #00ffff40; }
@@ -498,28 +506,94 @@
     function updateEquationVisual(eq) {
       const container = document.getElementById('equation-visual');
       if (!container) return;
+      container.innerHTML = '';
       if (!eq) {
         container.style.display = 'none';
-        container.innerHTML = '';
         return;
       }
 
-      const validCount = [eq.rowFactor, eq.colFactor, eq.product]
-        .filter(cellHasCorrectValue).length;
+      const rVis = isCellVisible(eq.rowFactor);
+      const cVis = isCellVisible(eq.colFactor);
+      const pVis = isCellVisible(eq.product);
+
+      const rCorrect = cellHasCorrectValue(eq.rowFactor);
+      const cCorrect = cellHasCorrectValue(eq.colFactor);
+      const pCorrect = cellHasCorrectValue(eq.product);
+
       const leftVal = parseInt(getValue(eq.rowFactor));
       const rightVal = parseInt(getValue(eq.colFactor));
+      const prodVal = parseInt(getValue(eq.product));
 
-      if (validCount < 2 || isNaN(leftVal) || isNaN(rightVal)) {
-        container.style.display = 'none';
-        container.innerHTML = '';
-        return;
-      }
+      const typedCorrect = [rVis ? 0 : (rCorrect ? 1 : 0),
+                            cVis ? 0 : (cCorrect ? 1 : 0),
+                            pVis ? 0 : (pCorrect ? 1 : 0)]
+                            .reduce((a,b) => a+b, 0);
+      const visibleCount = [rVis, cVis, pVis].filter(Boolean).length;
 
+      const showFull = () => {
+        if (isNaN(leftVal) || isNaN(rightVal)) return;
         container.style.display = 'flex';
         container.innerHTML = '';
+        container.appendChild(buildTopGroup());
+        container.appendChild(createOrLabel());
+        container.appendChild(buildBottomGroup());
+      };
 
-        const topGroup = document.createElement('div');
-        const topEmoji = objectMap[rightVal] || '•';
+      const showTopOnly = () => {
+        if (isNaN(leftVal) || isNaN(rightVal)) return;
+        container.style.display = 'flex';
+        container.innerHTML = '';
+        container.appendChild(buildTopGroup());
+      };
+
+      const showBottomOnly = () => {
+        if (isNaN(leftVal) || isNaN(rightVal)) return;
+        container.style.display = 'flex';
+        container.innerHTML = '';
+        container.appendChild(buildBottomGroup());
+      };
+
+      const showSolveMsg = () => {
+        container.style.display = 'flex';
+        container.innerHTML = '<div class="solve-msg">Solve for another cell!</div>';
+      };
+
+      const showQuestion = () => {
+        container.style.display = 'flex';
+        container.innerHTML = '<div class="solve-msg">?</div>';
+      };
+
+      const showQuestionMarks = count => {
+        if (isNaN(count) || count <= 0) return;
+        container.style.display = 'block';
+        container.style.position = 'relative';
+        container.innerHTML = '';
+        for (let i = 0; i < count; i++) {
+          const span = document.createElement('span');
+          span.textContent = '?';
+          span.style.position = 'absolute';
+          span.style.left = Math.random() * 90 + '%';
+          span.style.top = Math.random() * 90 + '%';
+          container.appendChild(span);
+        }
+        const orLbl = createOrLabel();
+        orLbl.style.position = 'absolute';
+        orLbl.style.left = '50%';
+        orLbl.style.top = '50%';
+        orLbl.style.transform = 'translate(-50%, -50%)';
+        container.appendChild(orLbl);
+      };
+
+      function createOrLabel() {
+        const div = document.createElement('div');
+        div.className = 'or-label';
+        div.textContent = 'OR';
+        return div;
+      }
+
+      function buildTopGroup() {
+        const g = document.createElement('div');
+        const emoji = objectMap[rightVal] || '•';
         for (let i = 0; i < leftVal; i++) {
           const group = document.createElement('div');
           group.className = 'object-group';
@@ -527,18 +601,17 @@
           for (let j = 0; j < rightVal; j++) {
             const span = document.createElement('span');
             span.className = 'object';
-            span.textContent = topEmoji;
+            span.textContent = emoji;
             group.appendChild(span);
           }
-          topGroup.appendChild(group);
+          g.appendChild(group);
         }
+        return g;
+      }
 
-        const orLabel = document.createElement('div');
-        orLabel.className = 'or-label';
-        orLabel.textContent = 'OR';
-
-        const bottomGroup = document.createElement('div');
-        const bottomEmoji = objectMap[leftVal] || '•';
+      function buildBottomGroup() {
+        const g = document.createElement('div');
+        const emoji = objectMap[leftVal] || '•';
         for (let i = 0; i < rightVal; i++) {
           const group = document.createElement('div');
           group.className = 'object-group';
@@ -546,15 +619,70 @@
           for (let j = 0; j < leftVal; j++) {
             const span = document.createElement('span');
             span.className = 'object';
-            span.textContent = bottomEmoji;
+            span.textContent = emoji;
             group.appendChild(span);
           }
-          bottomGroup.appendChild(group);
+          g.appendChild(group);
         }
+        return g;
+      }
 
-        container.appendChild(topGroup);
-        container.appendChild(orLabel);
-        container.appendChild(bottomGroup);
+      // --- Decision Logic ---
+      if (rCorrect && cCorrect && pCorrect) {
+        showFull();
+        return;
+      }
+
+      if (visibleCount === 0) {
+        if (typedCorrect === 0) {
+          showQuestion();
+        } else if (typedCorrect === 1) {
+          showSolveMsg();
+        } else if (typedCorrect === 2) {
+          if (rCorrect && cCorrect) {
+            showFull();
+          } else if (rCorrect) {
+            showBottomOnly();
+          } else if (cCorrect) {
+            showTopOnly();
+          }
+        } else if (typedCorrect === 3) {
+          showFull();
+        }
+        return;
+      }
+
+      if (visibleCount === 1) {
+        if (typedCorrect === 0) {
+          if (pVis) {
+            showQuestionMarks(prodVal);
+          } else {
+            showSolveMsg();
+          }
+        } else {
+          if ((rVis || rCorrect) && (cVis || cCorrect)) {
+            showFull();
+          } else if (rVis || rCorrect) {
+            showBottomOnly();
+          } else if (cVis || cCorrect) {
+            showTopOnly();
+          }
+        }
+        return;
+      }
+
+      if (visibleCount === 2) {
+        if ((rVis && cVis) || (rCorrect && cCorrect)) {
+          showFull();
+        } else if (rVis || rCorrect) {
+          showBottomOnly();
+        } else if (cVis || cCorrect) {
+          showTopOnly();
+        }
+        return;
+      }
+
+      showFull();
     }
 
     function findEquationWithCell(cell) {
@@ -744,6 +872,10 @@
       
       if (validationActive && input.value.trim() !== '') {
         if (input.value.trim() === obj.value) {
+          if (!cell.dataset.loggedCorrect) {
+            console.log(`Cell (${row},${col}) answered correctly`);
+            cell.dataset.loggedCorrect = 'true';
+          }
           cell.classList.add('correct');
         } else {
           cell.classList.add('incorrect');
