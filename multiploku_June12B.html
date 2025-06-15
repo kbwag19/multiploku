@@ -317,6 +317,10 @@
     #visual-container {
       min-height: 300px;
       min-width: 320px;
+      max-height: 450px;
+      overflow: auto;
+      padding: 10px;
+      box-sizing: border-box;
     }
     .eq-visual {
       display: flex;
@@ -331,9 +335,9 @@
     .eq-visual .object-group {
       display: flex;
       flex-wrap: wrap;
-      gap: 4px;
+      gap: clamp(2px, 1vw, 8px);
       margin: 8px 0;
-      padding: 6px;
+      padding: clamp(4px, 1vw, 12px);
       border-radius: 50%;
       animation: circleAnim 2s linear infinite;
       animation-play-state: paused;
@@ -342,7 +346,7 @@
       animation-play-state: running;
     }
     .eq-visual .object {
-      font-size: 24px;
+      font-size: clamp(16px, 4vw, 32px);
     }
     .eq-visual .or-label {
       font-weight: 900;
@@ -851,10 +855,12 @@
             }
           });
 
+          let typingTimer;
           input.addEventListener('input', () => {
-            if (validationActive) {
+            if (typingTimer) clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => {
               validateSingleCell(cell);
-            }
+            }, 1000);
           });
         }
       });
