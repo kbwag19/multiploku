@@ -361,9 +361,6 @@
     .eq-visual.rotating {
       transition: transform 0.5s ease;
     }
-    .eq-visual.rotated {
-      transform: rotate(90deg);
-    }
 
     .eq-visual .object {
       display: inline-block;
@@ -1046,11 +1043,15 @@
         dotsRotated = !dotsRotated;
         const vis = document.getElementById('equation-visual');
         vis.classList.add('rotating');
+        vis.style.transform = 'rotate(-90deg)';
         updateEquationVisual(getActiveEquation());
         requestAnimationFrame(() => {
-          vis.classList.toggle('rotated', dotsRotated);
+          vis.style.transform = 'rotate(0deg)';
         });
-        setTimeout(() => vis.classList.remove('rotating'), 500);
+        vis.addEventListener('transitionend', () => {
+          vis.classList.remove('rotating');
+          vis.style.transform = '';
+        }, { once: true });
       });
       
       grid.addEventListener('click', (e) => {
