@@ -323,6 +323,7 @@
     }
 
     #visual-container {
+      position: relative;
       min-height: 300px;
       min-width: 320px;
       max-height: 450px;
@@ -332,42 +333,43 @@
       background: #2a2a2a;
       border: 2px solid #444;
     }
+
+    #rotate-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: transparent;
+      border: none;
+      color: #00ffff;
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    #rotate-btn:hover {
+      color: #00cccc;
+    }
     .eq-visual {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      align-items: flex-start;
+      display: grid;
       justify-content: center;
-      gap: 12px;
+      align-content: center;
+      gap: 6px;
       color: #00ffff;
       font-size: 14px;
       word-break: break-all;
     }
-    .eq-visual .object-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: clamp(1px, 0.8vw, 4px);
-      margin: 4px;
-      padding: clamp(2px, 0.5vw, 8px);
-      border-radius: 50%;
-      animation: circleAnim 2s linear infinite;
-      animation-play-state: paused;
+    .eq-visual.rotating {
+      transition: transform 0.5s ease;
     }
-    #visual-container:hover .object-group {
-      animation-play-state: running;
+    .eq-visual.rotated {
+      transform: rotate(90deg);
     }
+
     .eq-visual .object {
       display: inline-block;
       width: clamp(12px, 3vw, 24px);
       height: clamp(12px, 3vw, 24px);
       border-radius: 50%;
-    }
-    .eq-visual .or-label {
-      font-weight: 900;
-      margin: 4px 0;
-      font-size: 24px;
-      font-family: 'Arial Black', sans-serif;
-      color: #ff66ff;
     }
 
     .eq-visual .solve-msg {
@@ -425,6 +427,7 @@
     <div class="board-wrapper">
       <div class="grid-container">
       <div class="container" id="visual-container">
+        <button id="rotate-btn" title="Rotate dots">&#8635;</button>
         <div id="equation-visual" class="eq-visual" style="display:none;"></div>
       </div>
       <div class="container" id="puzzle-container">
@@ -464,6 +467,7 @@
       let selectedCells = [];
       let activeCellInEquation = null; // Track which cell in the equation is the "active" one
       let equations = [];
+      let dotsRotated = false;
 
       const colorMap = {
         1: '#ff5959',
@@ -534,175 +538,31 @@
 
       const rVis = isCellVisible(eq.rowFactor);
       const cVis = isCellVisible(eq.colFactor);
-      const pVis = isCellVisible(eq.product);
-
       const rCorrect = cellHasCorrectValue(eq.rowFactor);
       const cCorrect = cellHasCorrectValue(eq.colFactor);
-      const pCorrect = cellHasCorrectValue(eq.product);
 
       const leftVal = parseInt(getValue(eq.rowFactor));
       const rightVal = parseInt(getValue(eq.colFactor));
-      const prodVal = parseInt(getValue(eq.product));
 
-      const typedCorrect = [rVis ? 0 : (rCorrect ? 1 : 0),
-                            cVis ? 0 : (cCorrect ? 1 : 0),
-                            pVis ? 0 : (pCorrect ? 1 : 0)]
-                            .reduce((a,b) => a+b, 0);
-      const visibleCount = [rVis, cVis, pVis].filter(Boolean).length;
-
-      const showFull = () => {
-        if (isNaN(leftVal) || isNaN(rightVal)) return;
-        container.style.display = 'flex';
-        container.innerHTML = '';
-        container.appendChild(buildTopGroup());
-        container.appendChild(createOrLabel());
-        container.appendChild(buildBottomGroup());
-      };
-
-      const showTopOnly = () => {
-        if (isNaN(leftVal) || isNaN(rightVal)) return;
-        container.style.display = 'flex';
-        container.innerHTML = '';
-        container.appendChild(buildTopGroup());
-      };
-
-      const showBottomOnly = () => {
-        if (isNaN(leftVal) || isNaN(rightVal)) return;
-        container.style.display = 'flex';
-        container.innerHTML = '';
-        container.appendChild(buildBottomGroup());
-      };
-
-      const showSolveMsg = () => {
-        container.style.display = 'flex';
-        container.innerHTML = '<div class="solve-msg">Solve for another cell!</div>';
-      };
-
-      const showQuestion = () => {
+      if (!(rVis || rCorrect) || !(cVis || cCorrect) || isNaN(leftVal) || isNaN(rightVal)) {
         container.style.display = 'flex';
         container.innerHTML = '<div class="solve-msg">?</div>';
-      };
-
-      const showQuestionMarks = count => {
-        if (isNaN(count) || count <= 0) return;
-        container.style.display = 'block';
-        container.style.position = 'relative';
-        container.innerHTML = '';
-        for (let i = 0; i < count; i++) {
-          const span = document.createElement('span');
-          span.textContent = '?';
-          span.style.position = 'absolute';
-          span.style.left = Math.random() * 90 + '%';
-          span.style.top = Math.random() * 90 + '%';
-          container.appendChild(span);
-        }
-        const orLbl = createOrLabel();
-        orLbl.style.position = 'absolute';
-        orLbl.style.left = '50%';
-        orLbl.style.top = '50%';
-        orLbl.style.transform = 'translate(-50%, -50%)';
-        container.appendChild(orLbl);
-      };
-
-      function createOrLabel() {
-        const div = document.createElement('div');
-        div.className = 'or-label';
-        div.textContent = 'OR';
-        return div;
-      }
-
-      function buildTopGroup() {
-        const g = document.createElement('div');
-        const color = colorMap[rightVal] || '#ffffff';
-        for (let i = 0; i < leftVal; i++) {
-          const group = document.createElement('div');
-          group.className = 'object-group';
-          group.style.animationDelay = `${i * 0.3}s`;
-          for (let j = 0; j < rightVal; j++) {
-            const span = document.createElement('span');
-            span.className = 'object';
-            span.style.backgroundColor = color;
-            group.appendChild(span);
-          }
-          g.appendChild(group);
-        }
-        return g;
-      }
-
-      function buildBottomGroup() {
-        const g = document.createElement('div');
-        const color = colorMap[leftVal] || '#ffffff';
-        for (let i = 0; i < rightVal; i++) {
-          const group = document.createElement('div');
-          group.className = 'object-group';
-          group.style.animationDelay = `${(leftVal + i) * 0.3}s`;
-          for (let j = 0; j < leftVal; j++) {
-            const span = document.createElement('span');
-            span.className = 'object';
-            span.style.backgroundColor = color;
-            group.appendChild(span);
-          }
-          g.appendChild(group);
-        }
-        return g;
-      }
-
-      // --- Decision Logic ---
-      if (rCorrect && cCorrect && pCorrect) {
-        showFull();
         return;
       }
 
-      if (visibleCount === 0) {
-        if (typedCorrect === 0) {
-          showQuestion();
-        } else if (typedCorrect === 1) {
-          showSolveMsg();
-        } else if (typedCorrect === 2) {
-          if (rCorrect && cCorrect) {
-            showFull();
-          } else if (rCorrect) {
-            showBottomOnly();
-          } else if (cCorrect) {
-            showTopOnly();
-          }
-        } else if (typedCorrect === 3) {
-          showFull();
-        }
-        return;
-      }
+      const rows = dotsRotated ? rightVal : leftVal;
+      const cols = dotsRotated ? leftVal : rightVal;
+      container.style.display = 'grid';
+      container.style.gridTemplateRows = `repeat(${rows}, auto)`;
+      container.style.gridTemplateColumns = `repeat(${cols}, auto)`;
 
-      if (visibleCount === 1) {
-        if (typedCorrect === 0) {
-          if (pVis) {
-            showQuestionMarks(prodVal);
-          } else {
-            showSolveMsg();
-          }
-        } else {
-          if ((rVis || rCorrect) && (cVis || cCorrect)) {
-            showFull();
-          } else if (rVis || rCorrect) {
-            showBottomOnly();
-          } else if (cVis || cCorrect) {
-            showTopOnly();
-          }
-        }
-        return;
+      const color = colorMap[leftVal] || '#ffffff';
+      for (let i = 0; i < rows * cols; i++) {
+        const span = document.createElement('span');
+        span.className = 'object';
+        span.style.backgroundColor = color;
+        container.appendChild(span);
       }
-
-      if (visibleCount === 2) {
-        if ((rVis && cVis) || (rCorrect && cCorrect)) {
-          showFull();
-        } else if (rVis || rCorrect) {
-          showBottomOnly();
-        } else if (cVis || cCorrect) {
-          showTopOnly();
-        }
-        return;
-      }
-
-      showFull();
     }
 
     function findEquationWithCell(cell) {
@@ -1180,6 +1040,18 @@
     // --- Event Listeners ---
     document.addEventListener('DOMContentLoaded', () => {
       const grid = document.getElementById('game-grid');
+      const rotateBtn = document.getElementById('rotate-btn');
+
+      rotateBtn.addEventListener('click', () => {
+        dotsRotated = !dotsRotated;
+        const vis = document.getElementById('equation-visual');
+        vis.classList.add('rotating');
+        updateEquationVisual(getActiveEquation());
+        requestAnimationFrame(() => {
+          vis.classList.toggle('rotated', dotsRotated);
+        });
+        setTimeout(() => vis.classList.remove('rotating'), 500);
+      });
       
       grid.addEventListener('click', (e) => {
         let target = e.target;
