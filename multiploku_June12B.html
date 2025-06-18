@@ -550,8 +550,8 @@
         return;
       }
 
-      const rows = dotsRotated ? rightVal : leftVal;
-      const cols = dotsRotated ? leftVal : rightVal;
+      const rows = leftVal;
+      const cols = rightVal;
       container.style.display = 'grid';
       container.style.gridTemplateRows = `repeat(${rows}, auto)`;
       container.style.gridTemplateColumns = `repeat(${cols}, auto)`;
