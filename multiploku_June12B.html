@@ -357,7 +357,10 @@
       animation-play-state: running;
     }
     .eq-visual .object {
-      font-size: clamp(12px, 3vw, 24px);
+      display: inline-block;
+      width: clamp(12px, 3vw, 24px);
+      height: clamp(12px, 3vw, 24px);
+      border-radius: 50%;
     }
     .eq-visual .or-label {
       font-weight: 900;
@@ -462,16 +465,16 @@
       let activeCellInEquation = null; // Track which cell in the equation is the "active" one
       let equations = [];
 
-      const objectMap = {
-        1: '👽',
-        2: '👾',
-        3: '🪼',
-        4: '🐸',
-        5: '🐵',
-        6: '🐷',
-        7: '🐼',
-        8: '🦊',
-        9: '🐙'
+      const colorMap = {
+        1: '#ff5959',
+        2: '#ff9f43',
+        3: '#ffe357',
+        4: '#8aff92',
+        5: '#5fd1ff',
+        6: '#6c83ff',
+        7: '#c972ff',
+        8: '#ff8ecf',
+        9: '#ffa94d'
       };
 
     // --- Utility Functions ---
@@ -610,7 +613,7 @@
 
       function buildTopGroup() {
         const g = document.createElement('div');
-        const emoji = objectMap[rightVal] || '•';
+        const color = colorMap[rightVal] || '#ffffff';
         for (let i = 0; i < leftVal; i++) {
           const group = document.createElement('div');
           group.className = 'object-group';
@@ -618,7 +621,7 @@
           for (let j = 0; j < rightVal; j++) {
             const span = document.createElement('span');
             span.className = 'object';
-            span.textContent = emoji;
+            span.style.backgroundColor = color;
             group.appendChild(span);
           }
           g.appendChild(group);
@@ -628,7 +631,7 @@
 
       function buildBottomGroup() {
         const g = document.createElement('div');
-        const emoji = objectMap[leftVal] || '•';
+        const color = colorMap[leftVal] || '#ffffff';
         for (let i = 0; i < rightVal; i++) {
           const group = document.createElement('div');
           group.className = 'object-group';
@@ -636,7 +639,7 @@
           for (let j = 0; j < leftVal; j++) {
             const span = document.createElement('span');
             span.className = 'object';
-            span.textContent = emoji;
+            span.style.backgroundColor = color;
             group.appendChild(span);
           }
           g.appendChild(group);
