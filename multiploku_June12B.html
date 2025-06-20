@@ -380,6 +380,27 @@
       font-size: 18px;
       text-align: center;
     }
+
+    .axis-label {
+      position: absolute;
+      color: #00ffff;
+      font-family: 'Arial Black', sans-serif;
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    .x-label {
+      bottom: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .y-label {
+      left: -20px;
+      top: 50%;
+      transform: translateY(-50%) rotate(-90deg);
+      transform-origin: center;
+    }
     @keyframes circleAnim {
       0% { box-shadow: 0 0 0 0 #00ffff40; }
       50% { box-shadow: 0 0 0 6px #00ffff80; }
@@ -431,6 +452,8 @@
       <div class="container" id="visual-container">
         <button id="rotate-btn" title="Rotate dots">&#8635;</button>
         <div id="equation-visual" class="eq-visual" style="display:none;"></div>
+        <div id="y-axis-label" class="axis-label y-label"></div>
+        <div id="x-axis-label" class="axis-label x-label"></div>
       </div>
       <div class="container" id="puzzle-container">
         <div class="center-grid" id="game-grid"></div>
@@ -531,10 +554,14 @@
 
     function updateEquationVisual(eq) {
       const container = document.getElementById('equation-visual');
+      const xLabel = document.getElementById('x-axis-label');
+      const yLabel = document.getElementById('y-axis-label');
       if (!container) return;
       container.innerHTML = '';
       if (!eq) {
         container.style.display = 'none';
+        if (xLabel) xLabel.textContent = '';
+        if (yLabel) yLabel.textContent = '';
         return;
       }
 
@@ -549,6 +576,8 @@
       if (!(rVis || rCorrect) || !(cVis || cCorrect) || isNaN(leftVal) || isNaN(rightVal)) {
         container.style.display = 'flex';
         container.innerHTML = '<div class="solve-msg">?</div>';
+        if (xLabel) xLabel.textContent = '';
+        if (yLabel) yLabel.textContent = '';
         return;
       }
 
@@ -557,6 +586,9 @@
       container.style.display = 'grid';
       container.style.gridTemplateRows = `repeat(${rows}, auto)`;
       container.style.gridTemplateColumns = `repeat(${cols}, auto)`;
+
+      if (xLabel) xLabel.textContent = cols;
+      if (yLabel) yLabel.textContent = rows;
 
       const color = colorMap[leftVal] || '#ffffff';
       for (let i = 0; i < rows * cols; i++) {
