@@ -343,6 +343,7 @@
       border: none;
       color: #00ffff;
       font-size: 24px;
+      padding: 4px;
       cursor: pointer;
       z-index: 10;
     }
@@ -1029,7 +1030,18 @@
       clearAllSelections();
       cell.classList.add('factor-selected');
       activeCellInEquation = cell;
-      
+
+      const { row, col } = getRowCol(cell);
+      if (row === 0 && col > 0) {
+        document.getElementById('eq-right').value = getValue(cell);
+        document.getElementById('eq-left').value = '';
+      } else if (row > 0 && col === 0) {
+        document.getElementById('eq-left').value = getValue(cell);
+        document.getElementById('eq-right').value = '';
+      }
+      document.getElementById('eq-result').value = '';
+      updateEquationVisual(null);
+
       if (!isCellVisible(cell)) {
         const input = cell.querySelector('input');
         if (input) {
