@@ -387,19 +387,24 @@
       font-family: 'Arial Black', sans-serif;
       font-size: 14px;
       pointer-events: none;
+      transition: opacity 0.3s ease;
     }
 
     .x-label {
-      bottom: 6px;
+      bottom: 16px;
       left: 50%;
       transform: translateX(-50%);
     }
 
     .y-label {
-      left: 6px;
+      left: 16px;
       top: 50%;
-      transform: translateY(-50%) rotate(-90deg);
+      transform: translateY(-50%) rotate(90deg);
       transform-origin: center;
+    }
+
+    .axis-label.fading {
+      opacity: 0;
     }
     @keyframes circleAnim {
       0% { box-shadow: 0 0 0 0 #00ffff40; }
@@ -587,8 +592,15 @@
       container.style.gridTemplateRows = `repeat(${rows}, auto)`;
       container.style.gridTemplateColumns = `repeat(${cols}, auto)`;
 
-      if (xLabel) xLabel.textContent = cols;
-      if (yLabel) yLabel.textContent = rows;
+      if (xLabel && yLabel) {
+        if (dotsRotated) {
+          xLabel.textContent = rows;
+          yLabel.textContent = cols;
+        } else {
+          xLabel.textContent = cols;
+          yLabel.textContent = rows;
+        }
+      }
 
       const color = colorMap[leftVal] || '#ffffff';
       for (let i = 0; i < rows * cols; i++) {
@@ -1090,8 +1102,19 @@
       rotateBtn.addEventListener('click', () => {
         dotsRotated = !dotsRotated;
         const vis = document.getElementById('equation-visual');
+        const xLabel = document.getElementById('x-axis-label');
+        const yLabel = document.getElementById('y-axis-label');
+
         vis.classList.add('rotating');
-        updateEquationVisual(getActiveEquation());
+        if (xLabel) xLabel.classList.add('fading');
+        if (yLabel) yLabel.classList.add('fading');
+
+        setTimeout(() => {
+          updateEquationVisual(getActiveEquation());
+          if (xLabel) xLabel.classList.remove('fading');
+          if (yLabel) yLabel.classList.remove('fading');
+        }, 150);
+
         requestAnimationFrame(() => {
           vis.classList.toggle('rotated', dotsRotated);
         });
