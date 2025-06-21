@@ -19,10 +19,10 @@
     }
     .grid-container {
       display: grid;
-      grid-template-columns: auto minmax(320px, auto);
+      grid-template-columns: auto minmax(300px, auto);
       gap: 10px;
       width: 100%;
-      max-width: 1000px;
+      max-width: 900px;
       margin: 0 auto;
       align-items: center;
     }
@@ -49,7 +49,7 @@
     }
     .center-grid {
       width: 100%;
-      max-width: 450px; /* smaller grid size */
+      max-width: 360px;
       height: auto;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -57,7 +57,7 @@
       gap: 2px;
       padding: 4px;
       background: #2a2a2a;
-      border: 1px solid #444;
+      border: none;
       border-radius: 0;
     }
     .center-grid {
@@ -185,44 +185,29 @@
     }
 
     .controls {
-      margin-top: 10px;
+      margin-top: 20px;
       display: flex;
-      flex-direction: column;
+      justify-content: center;
       align-items: center;
+      gap: 10px;
     }
-    .difficulty-selector {
+    .difficulty-container {
       display: flex;
       align-items: center;
-      margin-bottom: 5px;
-    }
-    .difficulty-line {
-      width: 120px;
-      height: 2px;
       background: #00ffff;
-      position: relative;
-      margin: 0 10px;
+      color: #121212;
+      padding: 10px 20px;
+      border-radius: 6px;
+      margin: 0 5px;
     }
-    .difficulty-dot {
-      width: 14px;
-      height: 14px;
-      background: #555;
-      border-radius: 50%;
-      position: absolute;
-      top: -6px;
-      cursor: pointer;
+    .difficulty-container input[type=range] {
+      width: 100px;
     }
-    .difficulty-dot.active {
-      background: #00ffff;
-    }
-    .dot-left { left: 0; }
-    .dot-center { left: 50%; transform: translateX(-50%); }
-    .dot-right { right: 0; }
     .difficulty-label {
       font-size: 14px;
-      height: 16px;
-      color: #00ffff;
-      text-align: center;
-      margin-bottom: 10px;
+      color: #121212;
+      margin-left: 8px;
+      margin-bottom: 0;
     }
     button {
       padding: 10px 20px;
@@ -291,7 +276,7 @@
       background: #1e1e1e;
       border: none;
       border-radius: 16px;
-      padding: 16px;
+      padding: 24px;
       display: inline-block;
     }
 
@@ -499,17 +484,11 @@
   </div>
 
   <div class="controls">
-    <div class="difficulty-selector">
-      <div class="difficulty-line">
-        <div class="difficulty-dot dot-left active" onclick="setDifficulty('beginner')"></div>
-        <div class="difficulty-dot dot-center" onclick="setDifficulty('confident')"></div>
-        <div class="difficulty-dot dot-right" onclick="setDifficulty('advanced')"></div>
-      </div>
-    </div>
-    <div class="difficulty-label" id="difficulty-label">Beginner</div>
-    <div>
-      <button onclick="generateGrid(currentDifficulty)">Start / New Game</button>
-      <button id="checkBtn" onclick="toggleValidation()">Check Answers</button>
+    <button onclick="generateGrid(currentDifficulty)">Start / New Game</button>
+    <button id="checkBtn" onclick="toggleValidation()">Check Answers</button>
+    <div class="difficulty-container">
+      <input type="range" id="difficulty-slider" min="1" max="3" step="1" value="1">
+      <span class="difficulty-label" id="difficulty-label">Beginner</span>
     </div>
   </div>
 
@@ -728,13 +707,11 @@
       if (label) {
         label.textContent = level.charAt(0).toUpperCase() + level.slice(1);
       }
-      document.querySelectorAll('.difficulty-dot').forEach(dot => dot.classList.remove('active'));
-      const map = {
-        beginner: '.dot-left',
-        confident: '.dot-center',
-        advanced: '.dot-right'
-      };
-      document.querySelector(map[level]).classList.add('active');
+      const slider = document.getElementById('difficulty-slider');
+      if (slider) {
+        const map = { beginner: 1, confident: 2, advanced: 3 };
+        slider.value = map[level];
+      }
     }
 
     // --- Grid Generation ---
@@ -1187,6 +1164,7 @@
       const eqLeft = document.getElementById('eq-left');
       const eqRight = document.getElementById('eq-right');
       const eqResult = document.getElementById('eq-result');
+      const slider = document.getElementById('difficulty-slider');
 
       function bindEqInput(input, part) {
         input.addEventListener('focus', () => {
@@ -1213,6 +1191,13 @@
       bindEqInput(eqLeft, 'rowFactor');
       bindEqInput(eqRight, 'colFactor');
       bindEqInput(eqResult, 'product');
+
+      if (slider) {
+        slider.addEventListener('input', (e) => {
+          const map = { 1: 'beginner', 2: 'confident', 3: 'advanced' };
+          setDifficulty(map[e.target.value]);
+        });
+      }
 
       rotateBtn.addEventListener('click', () => {
         dotsRotated = !dotsRotated;
