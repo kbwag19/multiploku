@@ -24,7 +24,12 @@
       width: 100%;
       max-width: 900px;
       margin: 0 auto;
-      align-items: center;
+      align-items: flex-start; /* align top edges of grid and equation */
+    }
+
+    #puzzle-container {
+      display: flex;
+      align-items: flex-start;
     }
 
     #right-panel {
@@ -332,7 +337,7 @@
 
     #visual-container {
       position: relative;
-      min-height: 300px;
+      min-height: 256px; /* align bottom with grid height */
       min-width: 320px;
       max-height: 450px;
       overflow: auto;
@@ -755,9 +760,13 @@
           } else if (row === 0) {
             cell.classList.add('factor');
             value = topFactors[col - 1];
+            cell.style.background = colorMap[value];
+            cell.style.color = '#121212';
           } else if (col === 0) {
             cell.classList.add('factor');
             value = leftFactors[row - 1];
+            cell.style.background = colorMap[value];
+            cell.style.color = '#121212';
           } else {
             value = topFactors[col - 1] * leftFactors[row - 1];
           }
