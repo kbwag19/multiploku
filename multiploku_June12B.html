@@ -19,13 +19,24 @@
     }
     .grid-container {
       display: grid;
-      grid-template-columns: 1.2fr auto 1fr; /* Left visual a bit wider */
+      grid-template-columns: auto minmax(320px, auto);
       gap: 10px;
       width: 100%;
-      max-width: 1000px; /* slightly smaller overall width */
+      max-width: 1000px;
       margin: 0 auto;
-      /* center grid items vertically so the visual container aligns with the game grid */
       align-items: center;
+    }
+
+    #right-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-width: 320px;
+    }
+
+    .equation-container,
+    #visual-container {
+      width: 100%;
     }
     .container {
       background: #1e1e1e;
@@ -465,23 +476,25 @@
   <div class="game-wrapper">
     <div class="board-wrapper">
       <div class="grid-container">
-      <div class="container" id="visual-container">
-        <button id="rotate-btn" title="Rotate dots">&#8635;</button>
-        <div id="equation-visual" class="eq-visual" style="display:none;"></div>
-        <div id="y-axis-label" class="axis-label y-label"></div>
-        <div id="x-axis-label" class="axis-label x-label"></div>
-      </div>
-      <div class="container" id="puzzle-container">
-        <div class="center-grid" id="game-grid"></div>
-      </div>
-      <div class="container">
-        <div class="equation-display">
-          <input id="eq-left" type="text" class="eq-box"> x
-          <input id="eq-right" type="text" class="eq-box"> =
-          <input id="eq-result" type="text" class="eq-box">
+        <div class="container" id="puzzle-container">
+          <div class="center-grid" id="game-grid"></div>
+        </div>
+        <div id="right-panel">
+          <div class="container equation-container">
+            <div class="equation-display">
+              <input id="eq-left" type="text" class="eq-box"> x
+              <input id="eq-right" type="text" class="eq-box"> =
+              <input id="eq-result" type="text" class="eq-box">
+            </div>
+          </div>
+          <div class="container" id="visual-container">
+            <button id="rotate-btn" title="Rotate dots">&#8635;</button>
+            <div id="equation-visual" class="eq-visual" style="display:none;"></div>
+            <div id="y-axis-label" class="axis-label y-label"></div>
+            <div id="x-axis-label" class="axis-label x-label"></div>
+          </div>
         </div>
       </div>
-    </div>
   </div>
   </div>
 
