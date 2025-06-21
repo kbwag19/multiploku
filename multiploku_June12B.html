@@ -19,12 +19,12 @@
     }
     .grid-container {
       display: grid;
-      grid-template-columns: auto minmax(300px, auto);
+      grid-template-columns: auto minmax(300px, auto) minmax(320px, auto);
       gap: 20px;
       width: 100%;
-      max-width: 900px;
+      max-width: 1200px;
       margin: 0 auto;
-      align-items: flex-start; /* align top edges of grid and equation */
+      align-items: flex-start; /* align top edges of grid and panels */
     }
 
     #puzzle-container {
@@ -32,7 +32,7 @@
       align-items: flex-start;
     }
 
-    #right-panel {
+    #equation-panel {
       display: flex;
       flex-direction: column;
       gap: 20px;
@@ -40,8 +40,33 @@
     }
 
     .equation-container,
-    #visual-container {
+    #visual-container,
+    #widget-container {
       width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 16px;
+    }
+
+    .widget-step {
+      font-size: 18px;
+      color: #e7e987;
+      text-align: center;
+      min-height: 40px;
+    }
+
+    .widget-note {
+      font-size: 14px;
+      color: #17b1bc;
+      text-align: center;
+      min-height: 24px;
+    }
+
+    .widget-controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
     }
     .container {
       background: #1e1e1e;
@@ -470,7 +495,7 @@
         <div class="container" id="puzzle-container">
           <div class="center-grid" id="game-grid"></div>
         </div>
-        <div id="right-panel">
+        <div id="equation-panel">
           <div class="container equation-container">
             <div class="equation-display">
               <input id="eq-left" type="text" class="eq-box"> x
@@ -478,12 +503,24 @@
               <input id="eq-result" type="text" class="eq-box">
             </div>
           </div>
-          <div class="container" id="visual-container">
-            <button id="rotate-btn" title="Rotate dots">&#8635;</button>
-            <div id="equation-visual" class="eq-visual" style="display:none;"></div>
-            <div id="y-axis-label" class="axis-label y-label"></div>
-            <div id="x-axis-label" class="axis-label x-label"></div>
+          <div class="container" id="widget-container">
+            <div class="widget-step" id="widget-step"></div>
+            <div class="widget-note" id="widget-note"></div>
+            <div class="widget-controls">
+              <button id="widget-back">Back</button>
+              <button id="widget-next">Next</button>
+            </div>
+            <div class="widget-controls">
+              <label><input type="radio" name="widget-mode" value="explanatory" checked> Explanatory</label>
+              <label><input type="radio" name="widget-mode" value="interactive"> Interactive</label>
+            </div>
           </div>
+        </div>
+        <div class="container" id="visual-container">
+          <button id="rotate-btn" title="Rotate dots">&#8635;</button>
+          <div id="equation-visual" class="eq-visual" style="display:none;"></div>
+          <div id="y-axis-label" class="axis-label y-label"></div>
+          <div id="x-axis-label" class="axis-label x-label"></div>
         </div>
       </div>
   </div>
@@ -507,6 +544,9 @@
       let activeCellInEquation = null; // Track which cell in the equation is the "active" one
       let equations = [];
       let dotsRotated = false;
+      let widgetMode = 'explanatory';
+      let widgetSteps = [];
+      let widgetIndex = 0;
 
       const colorMap = {
         1: "#e7e987",
@@ -646,6 +686,72 @@
       });
     }
 
+    function getUnknownPart(eq) {
+      if (!eq) return null;
+      if (!isCellVisible(eq.product)) return 'product';
+      if (!isCellVisible(eq.rowFactor)) return 'rowFactor';
+      if (!isCellVisible(eq.colFactor)) return 'colFactor';
+      return null;
+    }
+
+    function prepareWidgetSteps(eq) {
+      if (!eq) {
+        widgetSteps = [];
+        widgetIndex = 0;
+        renderWidgetStep();
+        return;
+      }
+      const leftVal = parseInt(getValue(eq.rowFactor));
+      const rightVal = parseInt(getValue(eq.colFactor));
+      const productVal = parseInt(getValue(eq.product));
+      const unknown = getUnknownPart(eq);
+      widgetSteps = [];
+
+      if (unknown === 'product') {
+        widgetSteps.push({ eq: `${leftVal} \u00D7 ${rightVal} = ?`, note: 'Multiply the visible factors.' });
+        widgetSteps.push({ eq: `${leftVal} \u00D7 ${rightVal} = ${leftVal * rightVal}`, note: '' });
+      } else if (unknown === 'rowFactor' || unknown === 'colFactor') {
+        const known = unknown === 'rowFactor' ? rightVal : leftVal;
+        const leftUnknown = unknown === 'rowFactor';
+        widgetSteps.push({ eq: leftUnknown ? `? \u00D7 ${known} = ${productVal}` : `${known} \u00D7 ? = ${productVal}`, note: `Divide each side of the equation by ${known} so that the unknown term is alone on one side of the equation.` });
+        widgetSteps.push({ eq: leftUnknown ? `? \u00D7 (${known}/${known}) = ${productVal}/${known}` : `(${known}/${known}) \u00D7 ? = ${productVal}/${known}`, note: '' });
+        widgetSteps.push({ eq: leftUnknown ? `? \u00D7 1 = ${productVal}/${known}` : `1 \u00D7 ? = ${productVal}/${known}`, note: `${known}/${known} = 1` });
+        widgetSteps.push({ eq: `? = ${productVal}/${known}`, note: 'Anything multiplied by 1 is itself.' });
+        widgetSteps.push({ eq: `? = ${productVal / known}`, note: '' });
+      } else {
+        widgetSteps.push({ eq: `${leftVal} \u00D7 ${rightVal} = ${productVal}`, note: '' });
+      }
+      widgetIndex = 0;
+      renderWidgetStep();
+    }
+
+    function renderWidgetStep() {
+      const stepEl = document.getElementById('widget-step');
+      const noteEl = document.getElementById('widget-note');
+      const backBtn = document.getElementById('widget-back');
+      const nextBtn = document.getElementById('widget-next');
+      if (!stepEl || !noteEl || !backBtn || !nextBtn) return;
+
+      if (widgetSteps.length === 0) {
+        stepEl.textContent = 'Select a cell';
+        noteEl.textContent = '';
+        backBtn.disabled = true;
+        nextBtn.disabled = true;
+        return;
+      }
+
+      const step = widgetSteps[widgetIndex];
+      stepEl.textContent = step.eq;
+      noteEl.textContent = step.note || '';
+      backBtn.disabled = widgetIndex === 0;
+      nextBtn.disabled = widgetIndex === widgetSteps.length - 1;
+    }
+
+    function updateSolverWidget(eq) {
+      if (widgetMode !== 'explanatory') return;
+      prepareWidgetSteps(eq);
+    }
+
     function UpdateEquationFields(eq) {
       const left = document.getElementById('eq-left');
       const right = document.getElementById('eq-right');
@@ -704,6 +810,7 @@
         validateSingleCell(cell);
       }
       updateEquationVisual(eq);
+      updateSolverWidget(eq);
     }
 
     // --- Difficulty Management ---
@@ -859,6 +966,7 @@
             UpdateEquationFields(getActiveEquation());
             UpdateEquationInputState();
             updateEquationVisual(getActiveEquation());
+            updateSolverWidget(getActiveEquation());
           });
         }
       });
@@ -889,6 +997,7 @@
       UpdateEquationFields(getActiveEquation());
       UpdateEquationInputState();
       updateEquationVisual(getActiveEquation());
+      updateSolverWidget(getActiveEquation());
     }
 
     function toggleValidation() {
@@ -1110,6 +1219,7 @@
       UpdateEquationFields(null);
       UpdateEquationInputState();
       updateEquationVisual(null);
+      updateSolverWidget(null);
     }
 
     function activateEquation(eq) {
@@ -1123,6 +1233,7 @@
       UpdateEquationFields(eq);
       UpdateEquationInputState();
       updateEquationVisual(eq);
+      updateSolverWidget(eq);
     }
 
     function setActiveCell(cell) {
@@ -1158,6 +1269,7 @@
       document.getElementById('eq-result').value = '';
       updateEquationVisual(null);
       UpdateEquationInputState();
+      updateSolverWidget(null);
 
       if (!isCellVisible(cell)) {
         const input = cell.querySelector('input');
@@ -1175,6 +1287,9 @@
       const eqRight = document.getElementById('eq-right');
       const eqResult = document.getElementById('eq-result');
       const slider = document.getElementById('difficulty-slider');
+      const backBtn = document.getElementById('widget-back');
+      const nextBtn = document.getElementById('widget-next');
+      const modeRadios = document.getElementsByName('widget-mode');
 
       function bindEqInput(input, part) {
         input.addEventListener('focus', () => {
@@ -1201,6 +1316,27 @@
       bindEqInput(eqLeft, 'rowFactor');
       bindEqInput(eqRight, 'colFactor');
       bindEqInput(eqResult, 'product');
+
+      backBtn.addEventListener('click', () => {
+        if (widgetIndex > 0) {
+          widgetIndex--;
+          renderWidgetStep();
+        }
+      });
+
+      nextBtn.addEventListener('click', () => {
+        if (widgetIndex < widgetSteps.length - 1) {
+          widgetIndex++;
+          renderWidgetStep();
+        }
+      });
+
+      modeRadios.forEach(r => {
+        r.addEventListener('change', e => {
+          widgetMode = e.target.value;
+          updateSolverWidget(getActiveEquation());
+        });
+      });
 
       if (slider) {
         slider.addEventListener('input', (e) => {
@@ -1251,6 +1387,7 @@
       setDifficulty('beginner');
       generateGrid('beginner');
       UpdateEquationInputState();
+      updateSolverWidget(null);
     });
   </script>
 </body>
