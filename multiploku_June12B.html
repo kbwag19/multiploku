@@ -20,7 +20,7 @@
     .grid-container {
       display: grid;
       grid-template-columns: auto minmax(300px, auto);
-      gap: 10px;
+      gap: 20px;
       width: 100%;
       max-width: 900px;
       margin: 0 auto;
@@ -30,7 +30,7 @@
     #right-panel {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 20px;
       min-width: 320px;
     }
 
@@ -269,14 +269,15 @@
     }
 
     .game-wrapper {
-      padding-top: 60px; /* add this so it’s not hidden under navbar */
+      padding-top: 50px; /* bring closer to navbar */
+      margin-bottom: 30px; /* extra space above controls */
     }
 
     .board-wrapper {
       background: #1e1e1e;
       border: none;
       border-radius: 16px;
-      padding: 24px;
+      padding: 32px;
       display: inline-block;
     }
 
