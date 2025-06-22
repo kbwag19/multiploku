@@ -33,3 +33,19 @@ test('generateGrid beginner creates 16 cells with correct products', async () =>
     }
   }
 });
+
+test('puzzle always has at least one visible cell per row and column', async () => {
+  const dom = await loadDom();
+  dom.window.generateGrid('beginner');
+  const grid = dom.window.document.getElementById('game-grid');
+  const cells = Array.from(grid.children);
+
+  for (let r = 1; r < 4; r++) {
+    const visible = cells.filter((c, idx) => Math.floor(idx / 4) === r && !c.classList.contains('hidden'));
+    expect(visible.length).toBeGreaterThan(0);
+  }
+  for (let c = 1; c < 4; c++) {
+    const visible = cells.filter((cEl, idx) => idx % 4 === c && !cEl.classList.contains('hidden'));
+    expect(visible.length).toBeGreaterThan(0);
+  }
+});
