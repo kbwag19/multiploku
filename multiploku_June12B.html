@@ -54,6 +54,11 @@
       color: #e7e987;
       text-align: center;
       min-height: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
     }
 
     .widget-note {
@@ -352,6 +357,25 @@
 
     .eq-box.editable {
       cursor: text;
+    }
+
+    .fraction {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1;
+    }
+
+    .fraction .frac-bar {
+      border-bottom: 2px solid #b3d8da;
+      width: 100%;
+      margin: 2px 0;
+    }
+
+    .fraction .num,
+    .fraction .den {
+      width: 100%;
+      text-align: center;
     }
     
     .eq-operator {
@@ -694,32 +718,37 @@
       return null;
     }
 
-    function prepareWidgetSteps(eq) {
-      if (!eq) {
-        widgetSteps = [];
-        widgetIndex = 0;
-        renderWidgetStep();
-        return;
+   function prepareWidgetSteps(eq) {
+     if (!eq) {
+       widgetSteps = [];
+       widgetIndex = 0;
+       renderWidgetStep();
+       return;
+     }
+     const leftVal = parseInt(getValue(eq.rowFactor));
+     const rightVal = parseInt(getValue(eq.colFactor));
+     const productVal = parseInt(getValue(eq.product));
+     const unknown = getUnknownPart(eq);
+     widgetSteps = [];
+
+      function box(content) {
+        return `<span class="eq-box">${content}</span>`;
       }
-      const leftVal = parseInt(getValue(eq.rowFactor));
-      const rightVal = parseInt(getValue(eq.colFactor));
-      const productVal = parseInt(getValue(eq.product));
-      const unknown = getUnknownPart(eq);
-      widgetSteps = [];
+
+      function frac(n, d) {
+        return `<span class="eq-box fraction"><span class="num">${n}</span><span class="frac-bar"></span><span class="den">${d}</span></span>`;
+      }
 
       if (unknown === 'product') {
-        widgetSteps.push({ eq: `${leftVal} \u00D7 ${rightVal} = ?`, note: 'Multiply the visible factors.' });
-        widgetSteps.push({ eq: `${leftVal} \u00D7 ${rightVal} = ${leftVal * rightVal}`, note: '' });
+        widgetSteps.push({ html: `${box(leftVal)} \u00D7 ${box(rightVal)} = ${box('?')}`, note: 'Multiply the visible factors.' });
+        widgetSteps.push({ html: `${box(leftVal)} \u00D7 ${box(rightVal)} = ${box(leftVal * rightVal)}`, note: '' });
       } else if (unknown === 'rowFactor' || unknown === 'colFactor') {
         const known = unknown === 'rowFactor' ? rightVal : leftVal;
-        const leftUnknown = unknown === 'rowFactor';
-        widgetSteps.push({ eq: leftUnknown ? `? \u00D7 ${known} = ${productVal}` : `${known} \u00D7 ? = ${productVal}`, note: `Divide each side of the equation by ${known} so that the unknown term is alone on one side of the equation.` });
-        widgetSteps.push({ eq: leftUnknown ? `? \u00D7 (${known}/${known}) = ${productVal}/${known}` : `(${known}/${known}) \u00D7 ? = ${productVal}/${known}`, note: '' });
-        widgetSteps.push({ eq: leftUnknown ? `? \u00D7 1 = ${productVal}/${known}` : `1 \u00D7 ? = ${productVal}/${known}`, note: `${known}/${known} = 1` });
-        widgetSteps.push({ eq: `? = ${productVal}/${known}`, note: 'Anything multiplied by 1 is itself.' });
-        widgetSteps.push({ eq: `? = ${productVal / known}`, note: '' });
+        widgetSteps.push({ html: `${box(known)}${box('x')} = ${box(productVal)}`, note: `Divide each side of the equation by ${known}.` });
+        widgetSteps.push({ html: `${frac(known, known)} ${box('x')} = ${frac(productVal, known)}`, note: '' });
+        widgetSteps.push({ html: `${box('x')} = ${box(productVal / known)}`, note: '' });
       } else {
-        widgetSteps.push({ eq: `${leftVal} \u00D7 ${rightVal} = ${productVal}`, note: '' });
+        widgetSteps.push({ html: `${box(leftVal)} \u00D7 ${box(rightVal)} = ${box(productVal)}`, note: '' });
       }
       widgetIndex = 0;
       renderWidgetStep();
@@ -741,7 +770,7 @@
       }
 
       const step = widgetSteps[widgetIndex];
-      stepEl.textContent = step.eq;
+      stepEl.innerHTML = step.html || step.eq;
       noteEl.textContent = step.note || '';
       backBtn.disabled = widgetIndex === 0;
       nextBtn.disabled = widgetIndex === widgetSteps.length - 1;
