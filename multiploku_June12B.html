@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Math Grid Game</title>
     <style>
+    @import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap");
     body {
       margin: 0;
       padding: 40px 0 0 0;
@@ -13,9 +14,9 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
-      background: #121212;
-      color: #b3d8da;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #000 url("theme_reference.png") center / cover fixed;
+      color: #e0f7fa;
+      font-family: 'Orbitron', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     .grid-container {
       display: grid;
@@ -51,7 +52,7 @@
 
     .widget-step {
       font-size: 18px;
-      color: #e7e987;
+      color: #fff;
       text-align: center;
       min-height: 40px;
       display: flex;
@@ -63,7 +64,7 @@
 
     .widget-note {
       font-size: 14px;
-      color: #17b1bc;
+      color: #00ffff;
       text-align: center;
       min-height: 24px;
     }
@@ -91,7 +92,7 @@
       grid-template-rows: repeat(4, 1fr);
       gap: 2px;
       padding: 4px;
-      background: #2a2a2a;
+      background: rgba(255,255,255,0.05); box-shadow: 0 0 12px rgba(0,255,255,0.2) inset;
       border: none;
       border-radius: 0;
     }
@@ -105,29 +106,27 @@
       align-items: center;
       font-weight: bold;
       font-size: 18px;
-      color: #b3d8da;
+      color: #e0f7fa;
       transition: all 0.2s ease;
       position: relative;
       cursor: pointer;
       /* Raised minesweeper button look */
-      border-top: 3px solid #7a7a7a;
-      border-left: 3px solid #7a7a7a;
-      border-right: 3px solid #3a3a3a;
-      border-bottom: 3px solid #3a3a3a;
-      background: linear-gradient(135deg, #5a5a5a 0%, #4a4a4a 50%, #3a3a3a 100%);
+      border: 1px solid #00ffff;
+      background: rgba(20,20,30,0.8);
+      box-shadow: 0 0 8px rgba(0,255,255,0.4);
     }
     
     /* Factor cells - slightly different coloring but same button structure */
     .cell.factor {
-      background: linear-gradient(135deg, #4a5a5a 0%, #3a4a4a 50%, #2a3a3a 100%);
-      color: #17b1bc;
-      text-shadow: 0 0 3px #17b1bc60;
+      background: rgba(0,255,255,0.1);
+      color: #00ffff;
+      text-shadow: 0 0 6px #00ffff;
     }
     
     /* Null cell (top-left) - same as products */
     .cell.null {
-      background: linear-gradient(135deg, #5a5a5a 0%, #4a4a4a 50%, #3a3a3a 100%);
-      color: #b3d8da;
+      background: rgba(20,20,30,0.8); box-shadow: 0 0 8px rgba(0,255,255,0.4);
+      color: #e0f7fa;
     }
     
     /* Input styling for hidden cells */
@@ -145,46 +144,40 @@
 
     /* Pressed state for cells in active equation (non-active cells) */
     .cell.highlight {
-      border-top: 2px solid #2a2a2a;
-      border-left: 2px solid #2a2a2a;
-      border-right: 2px solid #5a5a5a;
-      border-bottom: 2px solid #5a5a5a;
-      background: linear-gradient(135deg, #3a3a3a 0%, #4a4a4a 50%, #5a5a5a 100%);
+      border: 1px solid #00ffff;
+      background: rgba(0,255,255,0.1);
+      box-shadow: 0 0 12px #00ffff;
       transform: translateY(1px);
     }
     
     /* Factor cells when pressed */
     .cell.factor.highlight {
-      background: linear-gradient(135deg, #2a3a3a 0%, #3a4a4a 50%, #4a5a5a 100%);
-      color: #ce5b9f;
+      background: rgba(0,255,255,0.2);
+      color: #ff55ff;
     }
 
     /* Deep pressed state for the active cell */
     .cell.active-cell {
-      border-top: 2px solid #1a1a1a;
-      border-left: 2px solid #1a1a1a;
-      border-right: 2px solid #6a6a6a;
-      border-bottom: 2px solid #6a6a6a;
-      background: linear-gradient(135deg, #2a2a2a 0%, #3a3a3a 50%, #4a4a4a 100%);
+      border: 1px solid #00ffff;
+      background: rgba(0,255,255,0.2);
+      box-shadow: 0 0 14px #00ffff inset;
       transform: translateY(2px);
       box-shadow: inset 0 0 8px #00000040;
     }
     
     /* Factor cells when active */
     .cell.factor.active-cell {
-      background: linear-gradient(135deg, #1a2a2a 0%, #2a3a3a 50%, #3a4a4a 100%);
-      color: #e57f65;
+      background: rgba(0,255,255,0.25);
+      color: #ff55ff;
     }
 
         /* Single factor cell selection (waiting for equation activation) */
     .cell.factor-selected {
-      border-top: 2px solid #1a2a2a;
-      border-left: 2px solid #1a2a2a;
-      border-right: 2px solid #6a6a6a;
-      border-bottom: 2px solid #6a6a6a;
-      background: linear-gradient(135deg, #1a2a2a 0%, #2a3a3a 50%, #3a4a4a 100%);
-      color: #17b1bc;
-      text-shadow: 0 0 5px #17b1bc80;
+      border: 1px solid #00ffff;
+      background: rgba(0,255,255,0.2);
+      box-shadow: 0 0 14px #00ffff inset;
+      color: #00ffff;
+      text-shadow: 0 0 5px #00ff80;
       box-shadow: 0 0 8px #17b1bc40, inset 0 0 8px #00000040;
       transform: translateY(2px);
     }
@@ -201,22 +194,22 @@
 
     /* Validation states */
     .cell.correct {
-      background: linear-gradient(135deg, #17b1bc 0%, #b3d8da 50%, #d6d260 100%) !important;
-      border-top: 3px solid #17b1bc;
-      border-left: 3px solid #17b1bc;
-      border-right: 3px solid #d6d260;
-      border-bottom: 3px solid #d6d260;
-      box-shadow: inset 0 0 10px #17b1bc30;
+      background: rgba(0,255,128,0.3) !important;
+      border-top: 1px solid #00ff80;
+      border-left: 1px solid #00ff80;
+      border-right: 1px solid #00ff80;
+      border-bottom: 1px solid #00ff80;
+      box-shadow: 0 0 10px #00ff80;
       text-shadow: 0 0 5px #17b1bc80;
     } 
     .cell.incorrect {
-      background: linear-gradient(135deg, #ce5b9f 0%, #e57f65 50%, #ce5b9f 100%) !important;
-      border-top: 3px solid #ce5b9f;
-      border-left: 3px solid #ce5b9f;
-      border-right: 3px solid #e57f65;
-      border-bottom: 3px solid #e57f65;
-      box-shadow: inset 0 0 10px #ce5b9f30;
-      text-shadow: 0 0 5px #ce5b9f80;
+      background: rgba(255,0,128,0.3) !important;
+      border-top: 1px solid #ff0080;
+      border-left: 1px solid #ff0080;
+      border-right: 1px solid #ff0080;
+      border-bottom: 1px solid #ff0080;
+      box-shadow: 0 0 10px #ff0080;
+      text-shadow: 0 0 5px #ff0080;
     }
 
     .controls {
@@ -230,17 +223,18 @@
       display: flex;
       align-items: center;
       background: #e7e987;
-      color: #17b1bc;
+      color: #00ffff;
       padding: 10px 20px;
-      border-radius: 6px;
+      border-radius: 6px; text-shadow: 0 0 5px #00ffff;
       margin: 0 5px;
+      font-family: 'Orbitron', sans-serif;
     }
     .difficulty-container input[type=range] {
       width: 100px;
     }
     .difficulty-label {
       font-size: 14px;
-      color: #17b1bc;
+      color: #00ffff;
       margin-left: 8px;
       margin-bottom: 0;
     }
@@ -248,20 +242,23 @@
       padding: 10px 20px;
       font-size: 14px;
       cursor: pointer;
-      background: #e57f65;
-      color: #e7e987;
-      border: none;
+      background: rgba(0,0,0,0.4);
+      color: #00ffff;
+      border: 1px solid #00ffff;
+      text-shadow: 0 0 5px #00ffff;
       margin: 0 5px;
       font-weight: bold;
       border-radius: 6px;
       transition: background 0.3s;
+      animation: pulse 2s infinite;
     }
     button:hover {
-      background: #ce5b9f;
+      background: rgba(0,255,255,0.2);
     }
 
     .button-active {
-      background: #d6d260;
+      background: #ff0080;
+      color: #fff;
     }
 
     .navbar {
@@ -270,7 +267,7 @@
       left: 0;
       width: 100%;
       height: 45px;
-      background: #17b1bc;
+      background: rgba(0,0,0,0.8);
       color: #e7e987;
       display: flex;
       justify-content: space-between;
@@ -287,19 +284,21 @@
     }
 
     .nav-buttons .nav-btn {
-      background: #d6d260;
-      color: #17b1bc;
+      background: rgba(0,0,0,0.4);
+      color: #00ffff;
       margin-left: 10px;
-      border: 2px solid #17b1bc;
+      border: 1px solid #00ffff;
       border-radius: 6px;
       padding: 8px 16px;
       font-weight: bold;
       transition: all 0.3s ease;
+      font-family: 'Orbitron', sans-serif;
+      animation: pulse 2s infinite;
     }
 
     .nav-buttons .nav-btn:hover {
-      background: #ce5b9f;
-      border-color: #ce5b9f;
+      background: rgba(0,255,255,0.2);
+      border-color: #00ffff;
       color: #e7e987;
     }
 
@@ -324,7 +323,7 @@
       align-items: center;
       justify-items: center;
       font-size: 20px;
-      color: #b3d8da;
+      color: #e0f7fa;
       width: 100%;
       height: 100%;
       padding: 12px;
@@ -337,16 +336,13 @@
       font-size: 18px;
       font-weight: bold;
       text-align: center;
-      border: none;
       outline: none;
       
       /* Match grid cell styling */
-      border-top: 3px solid #7a7a7a;
-      border-left: 3px solid #7a7a7a;
-      border-right: 3px solid #3a3a3a;
-      border-bottom: 3px solid #3a3a3a;
-      background: linear-gradient(135deg, #5a5a5a 0%, #4a4a4a 50%, #3a3a3a 100%);
-      color: #b3d8da;
+      border: 1px solid #00ffff;
+      background: rgba(20,20,30,0.8);
+      box-shadow: 0 0 8px rgba(0,255,255,0.4);
+      color: #e0f7fa;
       cursor: pointer;
       transition: all 0.2s ease;
     }
@@ -361,12 +357,9 @@
 
     /* Give widget cells the pressed look of active grid cells */
     .widget-step .eq-box {
-      border-top: 2px solid #1a1a1a;
-      border-left: 2px solid #1a1a1a;
-      border-right: 2px solid #6a6a6a;
-      border-bottom: 2px solid #6a6a6a;
-      background: linear-gradient(135deg, #2a2a2a 0%, #3a3a3a 50%, #4a4a4a 100%);
-      box-shadow: inset 0 0 8px #00000040;
+            border: 1px solid #00ffff;
+      background: rgba(20,20,30,0.8);
+      box-shadow: 0 0 8px rgba(0,255,255,0.4);
       transform: translateY(2px);
     }
 
@@ -378,7 +371,7 @@
     }
 
     .fraction .frac-bar {
-      border-bottom: 2px solid #b3d8da;
+      border-bottom: 2px solid #00ffff;
       width: 100%;
       margin: 2px 0;
     }
@@ -391,7 +384,7 @@
     
     .eq-operator {
       font-weight: bold;
-      color: #17b1bc;
+      color: #00ffff;
       font-size: 20px;
     }
 
@@ -414,7 +407,7 @@
       right: 8px;
       background: transparent;
       border: none;
-      color: #17b1bc;
+      color: #00ffff;
       font-size: 24px;
       padding: 4px;
       cursor: pointer;
@@ -429,7 +422,7 @@
       justify-content: center;
       align-content: center;
       gap: 6px;
-      color: #17b1bc;
+      color: #00ffff;
       font-size: 14px;
       word-break: break-all;
     }
@@ -449,14 +442,14 @@
 
     .eq-visual .solve-msg {
       font-family: 'Arial Black', sans-serif;
-      color: #17b1bc;
+      color: #00ffff;
       font-size: 18px;
       text-align: center;
     }
 
     .axis-label {
       position: absolute;
-      color: #17b1bc;
+      color: #00ffff;
       font-family: 'Arial Black', sans-serif;
       font-size: 14px;
       pointer-events: none;
@@ -488,7 +481,7 @@
     .cell.selected {
       outline: 3px solid #17b1bc;
       outline-offset: -2px;
-      background: linear-gradient(135deg, #e57f65 0%, #ce5b9f 50%, #b3d8da 100%) !important;
+      background: linear-gradient(135deg, #e57f65 0%, #ce5b9f 50%, #00ffff 100%) !important;
       border-top: 3px solid #e57f65;
       border-left: 3px solid #e57f65;
       border-right: 3px solid #e57f65;
@@ -498,19 +491,19 @@
 
     @keyframes pulse {
       0% { 
-        box-shadow: 0 0 5px #17b1bc, inset 0 0 8px #17b1bc30;
-        border-top: 3px solid #b3d8da;
-        border-left: 3px solid #b3d8da;
+        box-shadow: 0 0 5px #00ffff, inset 0 0 8px #17b1bc30;
+        border-top: 3px solid #00ffff;
+        border-left: 3px solid #00ffff;
       }
       50% { 
-        box-shadow: 0 0 15px #17b1bc, inset 0 0 12px #17b1bc40;
+        box-shadow: 0 0 15px #00ffff, inset 0 0 12px #17b1bc40;
         border-top: 3px solid #e57f65;
         border-left: 3px solid #e57f65;
       }
       100% { 
-        box-shadow: 0 0 5px #17b1bc, inset 0 0 8px #17b1bc30;
-        border-top: 3px solid #b3d8da;
-        border-left: 3px solid #b3d8da;
+        box-shadow: 0 0 5px #00ffff, inset 0 0 8px #17b1bc30;
+        border-top: 3px solid #00ffff;
+        border-left: 3px solid #00ffff;
       }
     }
   </style>
@@ -589,7 +582,7 @@
         3: "#e57f65",
         4: "#d6d260",
         5: "#ce5b9f",
-        6: "#b3d8da",
+        6: "#00ffff",
         7: "#e7e987",
         8: "#17b1bc",
         9: "#e57f65"
@@ -686,7 +679,7 @@
         }
       }
 
-      const color = colorMap[leftVal] || '#b3d8da';
+      const color = colorMap[leftVal] || '#e0f7fa';
       for (let i = 0; i < rows * cols; i++) {
         const span = document.createElement('span');
         span.className = 'object';
