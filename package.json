@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Testing generateGrid",
   "scripts": {
+    "pretest": "[ -d node_modules ] || npm install",
     "test": "jest"
   },
   "devDependencies": {
