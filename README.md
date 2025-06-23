@@ -8,3 +8,6 @@ Install dependencies and run the test suite with:
 npm install
 npm test
 ```
+
+In CI environments, make sure `npm install` runs before invoking `npm test` so
+that all dependencies are available.
