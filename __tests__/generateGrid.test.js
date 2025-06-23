@@ -1,8 +1,10 @@
 const { JSDOM } = require('jsdom');
 const fs = require('fs');
+const path = require('path');
 
 async function loadDom() {
-  const html = fs.readFileSync('multiploku_June12B.html', 'utf8');
+  const htmlPath = path.join(__dirname, '../multiploku_June12B.html');
+  const html = fs.readFileSync(htmlPath, 'utf8');
   const dom = new JSDOM(html, { runScripts: 'dangerously' });
   // wait for DOMContentLoaded handlers
   await new Promise(resolve => {
