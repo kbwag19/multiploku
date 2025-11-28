@@ -543,27 +543,40 @@
   </nav>
 
   <div class="game-wrapper">
-      <div class="board-wrapper">
-        <div class="grid-container">
-          <div class="container" id="visual-container">
-            <button id="rotate-btn" title="Rotate dots">&#8635;</button>
-            <div id="equation-visual" class="eq-visual" style="display:none;"></div>
-            <div id="y-axis-label" class="axis-label y-label"></div>
-            <div id="x-axis-label" class="axis-label x-label"></div>
-          </div>
-          <div id="side-panel">
-            <div class="container equation-container">
-              <div class="equation-display">
-                <input id="eq-left" type="text" class="eq-box"> x
-                <input id="eq-right" type="text" class="eq-box"> =
-                <input id="eq-result" type="text" class="eq-box">
-              </div>
-            </div>
-            <div class="container" id="puzzle-container">
-              <div class="center-grid" id="game-grid"></div>
+    <div class="board-wrapper">
+      <div class="grid-container">
+        <div class="container" id="puzzle-container">
+          <div class="center-grid" id="game-grid"></div>
+        </div>
+        <div id="equation-panel">
+          <div class="container equation-container">
+            <div class="equation-display">
+              <input id="eq-left" type="text" class="eq-box"> x
+              <input id="eq-right" type="text" class="eq-box"> =
+              <input id="eq-result" type="text" class="eq-box">
             </div>
           </div>
+          <div class="container" id="widget-container">
+            <div class="widget-step" id="widget-step"></div>
+            <div class="widget-note" id="widget-note"></div>
+            <div class="widget-controls">
+              <button id="widget-back">Back</button>
+              <button id="widget-next">Next</button>
+            </div>
+            <div class="widget-controls">
+              <label><input type="radio" name="widget-mode" value="explanatory" checked> Explanatory</label>
+              <label><input type="radio" name="widget-mode" value="interactive"> Interactive</label>
+            </div>
+          </div>
+        </div>
+        <div class="container" id="visual-container">
+          <button id="rotate-btn" title="Rotate dots">&#8635;</button>
+          <div id="equation-visual" class="eq-visual" style="display:none;"></div>
+          <div id="y-axis-label" class="axis-label y-label"></div>
+          <div id="x-axis-label" class="axis-label x-label"></div>
+        </div>
       </div>
+  </div>
   </div>
 
   <div class="controls">
@@ -574,8 +587,8 @@
       <span class="difficulty-label" id="difficulty-label">Beginner</span>
     </div>
   </div>
-
   <script src="clickProductCell.js"></script>
   <script src="math_game_subroutines.js"></script>
+  <script src="widget_subroutines.js"></script>
 </body>
 </html>
