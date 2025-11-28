@@ -7,16 +7,22 @@
       let equations = [];
       let dotsRotated = false;
 
+      function EMIT_EQUATION_UPDATE(eq) {
+        document.dispatchEvent(
+          new CustomEvent('equation-updated', { detail: { equation: eq || null } })
+        );
+      }
+
       const colorMap = {
-        1: "#e7e987",
-        2: "#17b1bc",
-        3: "#e57f65",
-        4: "#d6d260",
-        5: "#ce5b9f",
-        6: "#b3d8da",
-        7: "#e7e987",
-        8: "#17b1bc",
-        9: "#e57f65"
+        1: "#9ed8ff",
+        2: "#7bd5f5",
+        3: "#a5b4fc",
+        4: "#b7f0e5",
+        5: "#f4d35e",
+        6: "#f2c6de",
+        7: "#c6ddff",
+        8: "#92eac0",
+        9: "#f6bd7b"
       };
 
     // --- Utility Functions ---
@@ -212,6 +218,7 @@
         validateSingleCell(cell);
       }
       updateEquationVisual(eq);
+      EMIT_EQUATION_UPDATE(eq);
     }
 
     // --- Difficulty Management ---
@@ -292,6 +299,7 @@
       hideCellsStrategically(settings.hideTotal);
 
       UpdateEquationInputState();
+      EMIT_EQUATION_UPDATE(null);
     }
 
     function defineEquations(grid) {
@@ -405,6 +413,7 @@
             UpdateEquationFields(getActiveEquation());
             UpdateEquationInputState();
             updateEquationVisual(getActiveEquation());
+            EMIT_EQUATION_UPDATE(getActiveEquation());
           });
         }
       });
@@ -435,6 +444,7 @@
       UpdateEquationFields(getActiveEquation());
       UpdateEquationInputState();
       updateEquationVisual(getActiveEquation());
+      EMIT_EQUATION_UPDATE(getActiveEquation());
     }
 
     function toggleValidation() {
@@ -559,6 +569,7 @@
       UpdateEquationFields(null);
       UpdateEquationInputState();
       updateEquationVisual(null);
+      EMIT_EQUATION_UPDATE(null);
     }
 
     function activateEquation(eq) {
@@ -572,6 +583,7 @@
       UpdateEquationFields(eq);
       UpdateEquationInputState();
       updateEquationVisual(eq);
+      EMIT_EQUATION_UPDATE(eq);
     }
 
     function setActiveCell(cell) {
@@ -607,6 +619,7 @@
       document.getElementById('eq-result').value = '';
       updateEquationVisual(null);
       UpdateEquationInputState();
+      EMIT_EQUATION_UPDATE(null);
 
       if (!isCellVisible(cell)) {
         const input = cell.querySelector('input');
