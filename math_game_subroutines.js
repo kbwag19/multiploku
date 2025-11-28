@@ -6,18 +6,48 @@
       let activeCellInEquation = null; // Track which cell in the equation is the "active" one
       let equations = [];
       let dotsRotated = false;
+      let openPanel = null;
+
+      function EMIT_EQUATION_UPDATE(eq) {
+        document.dispatchEvent(
+          new CustomEvent('equation-updated', { detail: { equation: eq || null } })
+        );
+      }
 
       const colorMap = {
-        1: "#e7e987",
-        2: "#17b1bc",
-        3: "#e57f65",
-        4: "#d6d260",
-        5: "#ce5b9f",
-        6: "#b3d8da",
-        7: "#e7e987",
-        8: "#17b1bc",
-        9: "#e57f65"
+        1: "#b6e1ff",
+        2: "#86e6d6",
+        3: "#9acbff",
+        4: "#c8e6ff",
+        5: "#ffdba4",
+        6: "#f4b6ce",
+        7: "#d5e3ff",
+        8: "#a8ead0",
+        9: "#ffe7ae"
       };
+
+    function CLOSE_SIDE_PANELS() {
+      document.querySelectorAll('.side-panel').forEach(panel => {
+        panel.classList.remove('open');
+        panel.setAttribute('aria-hidden', 'true');
+      });
+      document.querySelectorAll('.tab-handle').forEach(handle => handle.classList.remove('active'));
+      openPanel = null;
+    }
+
+    function OPEN_SIDE_PANEL(panelId) {
+      const target = document.getElementById(panelId);
+      if (!target) return;
+      const alreadyOpen = target.classList.contains('open');
+      CLOSE_SIDE_PANELS();
+      if (alreadyOpen) return;
+
+      target.classList.add('open');
+      target.setAttribute('aria-hidden', 'false');
+      const matchingHandle = document.querySelector(`.tab-handle[data-target="${panelId}"]`);
+      if (matchingHandle) matchingHandle.classList.add('active');
+      openPanel = target;
+    }
 
     // --- Utility Functions ---
     function getRowCol(cell) {
@@ -212,6 +242,7 @@
         validateSingleCell(cell);
       }
       updateEquationVisual(eq);
+      EMIT_EQUATION_UPDATE(eq);
     }
 
     // --- Difficulty Management ---
@@ -292,6 +323,7 @@
       hideCellsStrategically(settings.hideTotal);
 
       UpdateEquationInputState();
+      EMIT_EQUATION_UPDATE(null);
     }
 
     function defineEquations(grid) {
@@ -405,6 +437,7 @@
             UpdateEquationFields(getActiveEquation());
             UpdateEquationInputState();
             updateEquationVisual(getActiveEquation());
+            EMIT_EQUATION_UPDATE(getActiveEquation());
           });
         }
       });
@@ -435,6 +468,7 @@
       UpdateEquationFields(getActiveEquation());
       UpdateEquationInputState();
       updateEquationVisual(getActiveEquation());
+      EMIT_EQUATION_UPDATE(getActiveEquation());
     }
 
     function toggleValidation() {
@@ -559,6 +593,7 @@
       UpdateEquationFields(null);
       UpdateEquationInputState();
       updateEquationVisual(null);
+      EMIT_EQUATION_UPDATE(null);
     }
 
     function activateEquation(eq) {
@@ -572,6 +607,7 @@
       UpdateEquationFields(eq);
       UpdateEquationInputState();
       updateEquationVisual(eq);
+      EMIT_EQUATION_UPDATE(eq);
     }
 
     function setActiveCell(cell) {
@@ -607,6 +643,7 @@
       document.getElementById('eq-result').value = '';
       updateEquationVisual(null);
       UpdateEquationInputState();
+      EMIT_EQUATION_UPDATE(null);
 
       if (!isCellVisible(cell)) {
         const input = cell.querySelector('input');
@@ -624,6 +661,8 @@
       const eqRight = document.getElementById('eq-right');
       const eqResult = document.getElementById('eq-result');
       const slider = document.getElementById('difficulty-slider');
+      const tabHandles = document.querySelectorAll('.tab-handle');
+      const closeButtons = document.querySelectorAll('.panel-close');
 
       function bindEqInput(input, part) {
         input.addEventListener('focus', () => {
@@ -658,6 +697,12 @@
           setDifficulty(map[e.target.value]);
         });
       }
+
+      tabHandles.forEach(handle => {
+        handle.addEventListener('click', () => OPEN_SIDE_PANEL(handle.dataset.target));
+      });
+
+      closeButtons.forEach(button => button.addEventListener('click', CLOSE_SIDE_PANELS));
 
       rotateBtn.addEventListener('click', () => {
         dotsRotated = !dotsRotated;

@@ -5,6 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Math Grid Game</title>
     <style>
+    :root {
+      --bg: #10233a;
+      --panel: #143354;
+      --panel-strong: #1d4870;
+      --panel-soft: #0f2842;
+      --text: #f5f8fc;
+      --text-rgb: 245, 248, 252;
+      --muted: #c3d2e6;
+      --accent: #86e6d6;
+      --accent-rgb: 134, 230, 214;
+      --accent-strong: #9acbff;
+      --accent-warm: #ffdba4;
+      --button-text: #0f233a;
+      --success: #7fead2;
+      --error: #f29bb1;
+      --border-strong: #265a86;
+      --border-soft: #143656;
+      --cell-top: #1c3e65;
+      --cell-bottom: #15344f;
+      --cell-highlight: #255279;
+      --cell-active: #2d628d;
+      --factor-text: #0f233a;
+      --factor-top: #b6e1ff;
+      --factor-bottom: #8fd1ff;
+    }
+
     body {
       margin: 0;
       padding: 40px 0 0 0;
@@ -13,18 +39,27 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
-      background: #121212;
-      color: #b3d8da;
+      background: radial-gradient(circle at 35% 15%, #1c3554 0%, #10233a 50%, #0b1c31 100%);
+      color: var(--text);
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     .grid-container {
-      display: grid;
-      grid-template-columns: auto minmax(620px, auto);
-      gap: 20px;
+      display: flex;
+      justify-content: center;
+      position: relative;
       width: 100%;
       max-width: 1200px;
       margin: 0 auto;
-      align-items: flex-start; /* align top edges of grid and panels */
+      align-items: flex-start;
+      padding-right: 28px;
+      box-sizing: border-box;
+    }
+
+    .grid-shell {
+      position: relative;
+      display: inline-flex;
+      justify-content: center;
+      align-items: stretch;
     }
 
     #puzzle-container {
@@ -32,29 +67,56 @@
       align-items: flex-start;
     }
 
-    #side-panel {
+    #equation-panel {
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 16px;
       min-width: 320px;
     }
 
     .equation-container,
-    #visual-container {
+    #visual-container,
+    #widget-container {
       width: 100%;
       display: flex;
       flex-direction: column;
       gap: 10px;
       padding: 16px;
     }
+
+    .widget-step {
+      font-size: 18px;
+      color: var(--accent);
+      text-align: center;
+      min-height: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .widget-note {
+      font-size: 14px;
+      color: var(--muted);
+      text-align: center;
+      min-height: 24px;
+    }
+
+    .widget-controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
     .container {
-      background: #1e1e1e;
-      border: none;
-      border-radius: 12px;
+      background: linear-gradient(165deg, var(--panel) 0%, var(--panel-soft) 85%);
+      border: 1px solid var(--border-soft);
+      border-radius: 14px;
       display: flex;
       justify-content: center;
       align-items: center;
       position: relative;
+      box-shadow: 0 18px 32px #00000025;
     }
     .center-grid {
       width: 100%;
@@ -65,43 +127,138 @@
       grid-template-rows: repeat(4, 1fr);
       gap: 2px;
       padding: 4px;
-      background: #2a2a2a;
-      border: none;
-      border-radius: 0;
+      background: var(--panel-soft);
+      border: 1px solid var(--border-soft);
+      border-radius: 10px;
     }
     .center-grid {
       aspect-ratio: 1 / 1;
+    }
+
+    .side-tab-group {
+      position: absolute;
+      right: -12px;
+      top: 50%;
+      transform: translate(100%, -50%);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 5;
+    }
+
+    .tab-handle {
+      background: linear-gradient(180deg, #bfe8ff 0%, #92d2ff 100%);
+      color: #0f233a;
+      border: 1px solid #77b7e5;
+      border-radius: 10px 10px 10px 10px;
+      padding: 10px 12px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 16px #00000025;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tab-handle:hover,
+    .tab-handle.active {
+      background: linear-gradient(180deg, #dff3ff 0%, #b1e3ff 100%);
+      box-shadow: 0 10px 20px #00000030;
+      transform: translateX(-2px);
+    }
+
+    .side-panel {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+      max-height: 450px;
+      width: min(360px, 80vw);
+      display: flex;
+      align-items: stretch;
+      justify-content: flex-start;
+      transform: translateX(110%);
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    .side-panel.open {
+      transform: translateX(14px);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .panel-card {
+      background: linear-gradient(160deg, var(--panel) 0%, var(--panel-soft) 100%);
+      border: 1px solid var(--border-strong);
+      border-radius: 16px;
+      padding: 14px;
+      box-shadow: 0 20px 30px #00000030;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .panel-close {
+      background: transparent;
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 6px 10px;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .panel-close:hover {
+      background: rgba(var(--text-rgb), 0.08);
+      color: var(--accent);
+    }
+
+    .side-card {
+      width: 100%;
+      box-shadow: inset 0 1px 0 #ffffff10;
     }
     /* Base button style for all cells */
     .cell {
       display: flex;
       justify-content: center;
       align-items: center;
-      font-weight: bold;
+      font-weight: 700;
       font-size: 18px;
-      color: #b3d8da;
+      color: var(--text);
       transition: all 0.2s ease;
       position: relative;
       cursor: pointer;
-      /* Raised minesweeper button look */
-      border-top: 3px solid #7a7a7a;
-      border-left: 3px solid #7a7a7a;
-      border-right: 3px solid #3a3a3a;
-      border-bottom: 3px solid #3a3a3a;
-      background: linear-gradient(135deg, #5a5a5a 0%, #4a4a4a 50%, #3a3a3a 100%);
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      background: linear-gradient(180deg, var(--cell-top) 0%, var(--cell-bottom) 100%);
+      box-shadow: inset 0 1px 0 #ffffff20, 0 1px 0 #00000030;
     }
     
     /* Factor cells - slightly different coloring but same button structure */
     .cell.factor {
-      background: linear-gradient(135deg, #4a5a5a 0%, #3a4a4a 50%, #2a3a3a 100%);
-      color: #17b1bc;
-      text-shadow: 0 0 3px #17b1bc60;
+      background: linear-gradient(180deg, var(--factor-top) 0%, var(--factor-bottom) 100%);
+      color: var(--factor-text);
+      text-shadow: 0 1px 2px #00000025;
+      border-color: #7fb6e6;
     }
     
     /* Null cell (top-left) - same as products */
     .cell.null {
-      background: linear-gradient(135deg, #5a5a5a 0%, #4a4a4a 50%, #3a3a3a 100%);
-      color: #b3d8da;
+      background: linear-gradient(180deg, var(--cell-top) 0%, var(--cell-bottom) 100%);
+      color: var(--muted);
     }
     
     /* Input styling for hidden cells */
@@ -119,78 +276,62 @@
 
     /* Pressed state for cells in active equation (non-active cells) */
     .cell.highlight {
-      border-top: 2px solid #2a2a2a;
-      border-left: 2px solid #2a2a2a;
-      border-right: 2px solid #5a5a5a;
-      border-bottom: 2px solid #5a5a5a;
-      background: linear-gradient(135deg, #3a3a3a 0%, #4a4a4a 50%, #5a5a5a 100%);
+      border-color: var(--cell-highlight);
+      background: linear-gradient(180deg, #1c2c45 0%, #132033 100%);
       transform: translateY(1px);
+      box-shadow: inset 0 0 0 1px #ffffff10;
     }
     
     /* Factor cells when pressed */
     .cell.factor.highlight {
-      background: linear-gradient(135deg, #2a3a3a 0%, #3a4a4a 50%, #4a5a5a 100%);
-      color: #ce5b9f;
+      background: linear-gradient(180deg, #7dcdf3 0%, #65b8eb 100%);
+      color: #0b111a;
+      box-shadow: inset 0 0 0 1px #ffffff15;
     }
 
     /* Deep pressed state for the active cell */
     .cell.active-cell {
-      border-top: 2px solid #1a1a1a;
-      border-left: 2px solid #1a1a1a;
-      border-right: 2px solid #6a6a6a;
-      border-bottom: 2px solid #6a6a6a;
-      background: linear-gradient(135deg, #2a2a2a 0%, #3a3a3a 50%, #4a4a4a 100%);
+      border-color: var(--cell-active);
+      background: linear-gradient(180deg, #1f3049 0%, #1a2941 100%);
       transform: translateY(2px);
-      box-shadow: inset 0 0 8px #00000040;
+      box-shadow: inset 0 0 10px #00000050;
     }
     
     /* Factor cells when active */
     .cell.factor.active-cell {
-      background: linear-gradient(135deg, #1a2a2a 0%, #2a3a3a 50%, #3a4a4a 100%);
-      color: #e57f65;
+      background: linear-gradient(180deg, #6bb3e0 0%, #5a9fcb 100%);
+      color: #0b111a;
     }
 
         /* Single factor cell selection (waiting for equation activation) */
     .cell.factor-selected {
-      border-top: 2px solid #1a2a2a;
-      border-left: 2px solid #1a2a2a;
-      border-right: 2px solid #6a6a6a;
-      border-bottom: 2px solid #6a6a6a;
-      background: linear-gradient(135deg, #1a2a2a 0%, #2a3a3a 50%, #3a4a4a 100%);
-      color: #17b1bc;
-      text-shadow: 0 0 5px #17b1bc80;
-      box-shadow: 0 0 8px #17b1bc40, inset 0 0 8px #00000040;
+      border-color: var(--accent);
+      background: linear-gradient(180deg, #1b2e46 0%, #15253b 100%);
+      color: var(--accent);
+      text-shadow: 0 0 6px #64d8cb70;
+      box-shadow: 0 0 12px #64d8cb35, inset 0 0 8px #00000040;
       transform: translateY(2px);
     }
 
     /* Ensure factor-selected always gets pressed-in effect regardless of other classes */
     .cell.factor.factor-selected {
-      border-top: 2px solid #1a2a2a !important;
-      border-left: 2px solid #1a2a2a !important;
-      border-right: 2px solid #6a6a6a !important;
-      border-bottom: 2px solid #6a6a6a !important;
-      background: linear-gradient(135deg, #1a2a2a 0%, #2a3a3a 50%, #3a4a4a 100%) !important;
+      border-color: var(--accent) !important;
+      background: linear-gradient(180deg, #6bb3e0 0%, #5a9fcb 100%) !important;
       transform: translateY(2px) !important;
     }
 
     /* Validation states */
     .cell.correct {
-      background: linear-gradient(135deg, #17b1bc 0%, #b3d8da 50%, #d6d260 100%) !important;
-      border-top: 3px solid #17b1bc;
-      border-left: 3px solid #17b1bc;
-      border-right: 3px solid #d6d260;
-      border-bottom: 3px solid #d6d260;
-      box-shadow: inset 0 0 10px #17b1bc30;
-      text-shadow: 0 0 5px #17b1bc80;
-    } 
+      background: linear-gradient(180deg, #1f7f7a 0%, #2fb19f 100%) !important;
+      border: 2px solid #2fb19f;
+      box-shadow: inset 0 0 0 1px #ffffff20, 0 0 0 2px #2fb19f55;
+      color: var(--text);
+    }
     .cell.incorrect {
-      background: linear-gradient(135deg, #ce5b9f 0%, #e57f65 50%, #ce5b9f 100%) !important;
-      border-top: 3px solid #ce5b9f;
-      border-left: 3px solid #ce5b9f;
-      border-right: 3px solid #e57f65;
-      border-bottom: 3px solid #e57f65;
-      box-shadow: inset 0 0 10px #ce5b9f30;
-      text-shadow: 0 0 5px #ce5b9f80;
+      background: linear-gradient(180deg, #3b1f35 0%, #5a2347 100%) !important;
+      border: 2px solid #f08ba2;
+      box-shadow: inset 0 0 0 1px #ffffff10, 0 0 0 2px #f08ba255;
+      color: var(--text);
     }
 
     .controls {
@@ -203,18 +344,20 @@
     .difficulty-container {
       display: flex;
       align-items: center;
-      background: #e7e987;
-      color: #17b1bc;
+      background: linear-gradient(135deg, #152235 0%, #0f1724 100%);
+      color: var(--accent);
       padding: 10px 20px;
-      border-radius: 6px;
+      border-radius: 8px;
+      border: 1px solid var(--border-strong);
       margin: 0 5px;
+      box-shadow: 0 8px 18px #00000030;
     }
     .difficulty-container input[type=range] {
       width: 100px;
     }
     .difficulty-label {
       font-size: 14px;
-      color: #17b1bc;
+      color: var(--accent);
       margin-left: 8px;
       margin-bottom: 0;
     }
@@ -222,20 +365,24 @@
       padding: 10px 20px;
       font-size: 14px;
       cursor: pointer;
-      background: #e57f65;
-      color: #e7e987;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+      color: var(--button-text);
       border: none;
       margin: 0 5px;
-      font-weight: bold;
-      border-radius: 6px;
-      transition: background 0.3s;
+      font-weight: 700;
+      border-radius: 10px;
+      transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+      box-shadow: 0 10px 24px #00000030;
     }
     button:hover {
-      background: #ce5b9f;
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+      box-shadow: 0 12px 28px #00000038;
     }
 
     .button-active {
-      background: #d6d260;
+      background: linear-gradient(135deg, var(--accent-warm) 0%, #f8dba0 100%);
+      color: #1b1b1b;
     }
 
     .navbar {
@@ -244,8 +391,8 @@
       left: 0;
       width: 100%;
       height: 45px;
-      background: #17b1bc;
-      color: #e7e987;
+      background: linear-gradient(90deg, #0f1724 0%, #101d31 100%);
+      color: var(--text);
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -253,6 +400,7 @@
       font-family: 'Arial Black', sans-serif;
       z-index: 1000;
       padding: 0 1rem;
+      box-shadow: 0 10px 24px #00000035;
     }
 
     .nav-title {
@@ -261,20 +409,20 @@
     }
 
     .nav-buttons .nav-btn {
-      background: #d6d260;
-      color: #17b1bc;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+      color: var(--button-text);
       margin-left: 10px;
-      border: 2px solid #17b1bc;
-      border-radius: 6px;
+      border: 1px solid transparent;
+      border-radius: 10px;
       padding: 8px 16px;
       font-weight: bold;
-      transition: all 0.3s ease;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 10px 24px #00000035;
     }
 
     .nav-buttons .nav-btn:hover {
-      background: #ce5b9f;
-      border-color: #ce5b9f;
-      color: #e7e987;
+      transform: translateY(-1px);
+      box-shadow: 0 12px 26px #00000045;
     }
 
     .game-wrapper {
@@ -283,11 +431,13 @@
     }
 
     .board-wrapper {
-      background: #1e1e1e;
-      border: none;
-      border-radius: 16px;
+      background: rgba(15, 23, 36, 0.8);
+      border: 1px solid var(--border-soft);
+      border-radius: 18px;
       padding: 32px;
       display: inline-block;
+      box-shadow: 0 20px 40px #00000035;
+      backdrop-filter: blur(4px);
     }
 
     .equation-display {
@@ -298,42 +448,48 @@
       align-items: center;
       justify-items: center;
       font-size: 20px;
-      color: #b3d8da;
+      color: var(--text);
       width: 100%;
       height: 100%;
       padding: 12px;
       box-sizing: border-box;
-      margin: 0 auto;
     }
     
     .eq-box {
       width: 40px;
       height: 40px;
       font-size: 18px;
-      font-weight: bold;
+      font-weight: 700;
       text-align: center;
-      border: none;
+      border: 1px solid var(--border-strong);
       outline: none;
-      
+      border-radius: 10px;
+
       /* Match grid cell styling */
-      border-top: 3px solid #7a7a7a;
-      border-left: 3px solid #7a7a7a;
-      border-right: 3px solid #3a3a3a;
-      border-bottom: 3px solid #3a3a3a;
-      background: linear-gradient(135deg, #5a5a5a 0%, #4a4a4a 50%, #3a3a3a 100%);
-      color: #b3d8da;
+      background: linear-gradient(180deg, var(--cell-top) 0%, var(--cell-bottom) 100%);
+      color: var(--text);
       cursor: pointer;
       transition: all 0.2s ease;
+      box-shadow: inset 0 1px 0 #ffffff10;
     }
 
     .eq-box[readonly] {
       cursor: default;
+      opacity: 0.9;
     }
 
-.eq-box.editable {
+    .eq-box.editable {
       cursor: text;
+      box-shadow: inset 0 0 0 1px var(--accent);
     }
 
+    /* Give widget cells the pressed look of active grid cells */
+    .widget-step .eq-box {
+      border: 1px solid var(--border-strong);
+      background: linear-gradient(180deg, #1a2941 0%, #132033 100%);
+      box-shadow: inset 0 0 10px #00000030;
+      transform: translateY(2px);
+    }
 
     .fraction {
       display: flex;
@@ -343,7 +499,7 @@
     }
 
     .fraction .frac-bar {
-      border-bottom: 2px solid #b3d8da;
+      border-bottom: 2px solid var(--muted);
       width: 100%;
       margin: 2px 0;
     }
@@ -356,7 +512,7 @@
     
     .eq-operator {
       font-weight: bold;
-      color: #17b1bc;
+      color: var(--accent);
       font-size: 20px;
     }
 
@@ -368,33 +524,38 @@
       overflow: auto;
       padding: 10px;
       box-sizing: border-box;
-      background: #2a2a2a;
-      border: none;
-      border-radius: 12px;
+      background: linear-gradient(165deg, var(--panel) 0%, var(--panel-soft) 90%);
+      border: 1px solid var(--border-soft);
+      border-radius: 14px;
+      box-shadow: inset 0 1px 0 #ffffff08;
     }
 
     #rotate-btn {
       position: absolute;
       top: 8px;
       right: 8px;
-      background: transparent;
-      border: none;
-      color: #17b1bc;
+      background: rgba(15, 23, 36, 0.85);
+      border: 1px solid var(--border-strong);
+      color: var(--text);
       font-size: 24px;
-      padding: 4px;
+      padding: 4px 8px;
       cursor: pointer;
+      border-radius: 10px;
       z-index: 10;
+      box-shadow: 0 8px 16px #00000030;
+      transition: transform 0.15s ease, filter 0.2s ease;
     }
 
     #rotate-btn:hover {
-      color: #ce5b9f;
+      filter: brightness(1.05);
+      transform: translateY(-1px);
     }
     .eq-visual {
       display: grid;
       justify-content: center;
       align-content: center;
       gap: 6px;
-      color: #17b1bc;
+      color: var(--accent);
       font-size: 14px;
       word-break: break-all;
     }
@@ -414,14 +575,14 @@
 
     .eq-visual .solve-msg {
       font-family: 'Arial Black', sans-serif;
-      color: #17b1bc;
+      color: var(--accent);
       font-size: 18px;
       text-align: center;
     }
 
     .axis-label {
       position: absolute;
-      color: #17b1bc;
+      color: var(--accent);
       font-family: 'Arial Black', sans-serif;
       font-size: 14px;
       pointer-events: none;
@@ -445,37 +606,34 @@
       opacity: 0;
     }
     @keyframes circleAnim {
-      0% { box-shadow: 0 0 0 0 #17b1bc40; }
-      50% { box-shadow: 0 0 0 6px #17b1bc80; }
-      100% { box-shadow: 0 0 0 0 #17b1bc40; }
+      0% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0.35); }
+      50% { box-shadow: 0 0 0 6px rgba(var(--accent-rgb), 0.65); }
+      100% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0.35); }
     }
 
     .cell.selected {
-      outline: 3px solid #17b1bc;
+      outline: 3px solid var(--accent);
       outline-offset: -2px;
-      background: linear-gradient(135deg, #e57f65 0%, #ce5b9f 50%, #b3d8da 100%) !important;
-      border-top: 3px solid #e57f65;
-      border-left: 3px solid #e57f65;
-      border-right: 3px solid #e57f65;
-      border-bottom: 3px solid #e57f65;
-      box-shadow: inset 0 0 10px #17b1bc40;
+      background: linear-gradient(180deg, #1f3049 0%, #1a2941 100%) !important;
+      border: 2px solid var(--accent);
+      box-shadow: inset 0 0 10px #64d8cb30;
     }
 
     @keyframes pulse {
       0% { 
-        box-shadow: 0 0 5px #17b1bc, inset 0 0 8px #17b1bc30;
-        border-top: 3px solid #b3d8da;
-        border-left: 3px solid #b3d8da;
+        box-shadow: 0 0 5px rgba(var(--accent-rgb), 0.6), inset 0 0 8px rgba(var(--accent-rgb), 0.3);
+        border-top: 3px solid rgba(var(--text-rgb), 0.6);
+        border-left: 3px solid rgba(var(--text-rgb), 0.6);
       }
-      50% { 
-        box-shadow: 0 0 15px #17b1bc, inset 0 0 12px #17b1bc40;
-        border-top: 3px solid #e57f65;
-        border-left: 3px solid #e57f65;
+      50% {
+        box-shadow: 0 0 15px rgba(var(--accent-rgb), 0.8), inset 0 0 12px rgba(var(--accent-rgb), 0.4);
+        border-top: 3px solid var(--accent-strong);
+        border-left: 3px solid var(--accent-strong);
       }
-      100% { 
-        box-shadow: 0 0 5px #17b1bc, inset 0 0 8px #17b1bc30;
-        border-top: 3px solid #b3d8da;
-        border-left: 3px solid #b3d8da;
+      100% {
+        box-shadow: 0 0 5px rgba(var(--accent-rgb), 0.6), inset 0 0 8px rgba(var(--accent-rgb), 0.3);
+        border-top: 3px solid rgba(var(--text-rgb), 0.6);
+        border-left: 3px solid rgba(var(--text-rgb), 0.6);
       }
     }
   </style>
@@ -490,27 +648,64 @@
   </nav>
 
   <div class="game-wrapper">
-      <div class="board-wrapper">
-        <div class="grid-container">
-          <div class="container" id="visual-container">
-            <button id="rotate-btn" title="Rotate dots">&#8635;</button>
-            <div id="equation-visual" class="eq-visual" style="display:none;"></div>
-            <div id="y-axis-label" class="axis-label y-label"></div>
-            <div id="x-axis-label" class="axis-label x-label"></div>
+    <div class="board-wrapper">
+      <div class="grid-container">
+        <div class="grid-shell">
+          <div class="container" id="puzzle-container">
+            <div class="center-grid" id="game-grid"></div>
           </div>
-          <div id="side-panel">
-            <div class="container equation-container">
-              <div class="equation-display">
-                <input id="eq-left" type="text" class="eq-box"> x
-                <input id="eq-right" type="text" class="eq-box"> =
-                <input id="eq-result" type="text" class="eq-box">
+          <div class="side-tab-group" aria-label="Open supplemental panels">
+            <button class="tab-handle" data-target="visual-panel">Visualize</button>
+            <button class="tab-handle" data-target="solve-panel">Solve</button>
+          </div>
+
+          <div class="side-panel" id="visual-panel" aria-hidden="true">
+            <div class="panel-card">
+              <div class="panel-header">
+                <span>Visualize</span>
+                <button class="panel-close" aria-label="Close visualize panel">&times;</button>
+              </div>
+              <div class="container side-card" id="visual-container">
+                <button id="rotate-btn" title="Rotate dots">&#8635;</button>
+                <div id="equation-visual" class="eq-visual" style="display:none;"></div>
+                <div id="y-axis-label" class="axis-label y-label"></div>
+                <div id="x-axis-label" class="axis-label x-label"></div>
               </div>
             </div>
-            <div class="container" id="puzzle-container">
-              <div class="center-grid" id="game-grid"></div>
+          </div>
+
+          <div class="side-panel" id="solve-panel" aria-hidden="true">
+            <div class="panel-card">
+              <div class="panel-header">
+                <span>Solve</span>
+                <button class="panel-close" aria-label="Close solve panel">&times;</button>
+              </div>
+              <div id="equation-panel">
+                <div class="container equation-container">
+                  <div class="equation-display">
+                    <input id="eq-left" type="text" class="eq-box"> x
+                    <input id="eq-right" type="text" class="eq-box"> =
+                    <input id="eq-result" type="text" class="eq-box">
+                  </div>
+                </div>
+                <div class="container" id="widget-container">
+                  <div class="widget-step" id="widget-step"></div>
+                  <div class="widget-note" id="widget-note"></div>
+                  <div class="widget-controls">
+                    <button id="widget-back">Back</button>
+                    <button id="widget-next">Next</button>
+                  </div>
+                  <div class="widget-controls">
+                    <label><input type="radio" name="widget-mode" value="explanatory" checked> Explanatory</label>
+                    <label><input type="radio" name="widget-mode" value="interactive"> Interactive</label>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+        </div>
       </div>
+  </div>
   </div>
 
   <div class="controls">
@@ -521,8 +716,8 @@
       <span class="difficulty-label" id="difficulty-label">Beginner</span>
     </div>
   </div>
-
   <script src="clickProductCell.js"></script>
   <script src="math_game_subroutines.js"></script>
+  <script src="widget_subroutines.js"></script>
 </body>
 </html>
