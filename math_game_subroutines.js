@@ -14,6 +14,17 @@
         );
       }
 
+      const colorMap = {
+        1: "#5da9f6",
+        2: "#5fc6c6",
+        3: "#7ec6ff",
+        4: "#a9d6ff",
+        5: "#ffd38a",
+        6: "#f5a7c2",
+        7: "#c7d9ff",
+        8: "#7ed8a8",
+        9: "#ffdcbc"
+
       function EMIT_EQUATION_UPDATE(eq) {
         document.dispatchEvent(
           new CustomEvent('equation-updated', { detail: { equation: eq || null } })
