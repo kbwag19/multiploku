@@ -6,6 +6,13 @@
       let activeCellInEquation = null; // Track which cell in the equation is the "active" one
       let equations = [];
       let dotsRotated = false;
+      let openPanel = null;
+
+      function EMIT_EQUATION_UPDATE(eq) {
+        document.dispatchEvent(
+          new CustomEvent('equation-updated', { detail: { equation: eq || null } })
+        );
+      }
 
       function EMIT_EQUATION_UPDATE(eq) {
         document.dispatchEvent(
@@ -33,6 +40,29 @@
         8: "#92eac0",
         9: "#f6bd7b"
       };
+
+    function CLOSE_SIDE_PANELS() {
+      document.querySelectorAll('.side-panel').forEach(panel => {
+        panel.classList.remove('open');
+        panel.setAttribute('aria-hidden', 'true');
+      });
+      document.querySelectorAll('.tab-handle').forEach(handle => handle.classList.remove('active'));
+      openPanel = null;
+    }
+
+    function OPEN_SIDE_PANEL(panelId) {
+      const target = document.getElementById(panelId);
+      if (!target) return;
+      const alreadyOpen = target.classList.contains('open');
+      CLOSE_SIDE_PANELS();
+      if (alreadyOpen) return;
+
+      target.classList.add('open');
+      target.setAttribute('aria-hidden', 'false');
+      const matchingHandle = document.querySelector(`.tab-handle[data-target="${panelId}"]`);
+      if (matchingHandle) matchingHandle.classList.add('active');
+      openPanel = target;
+    }
 
     // --- Utility Functions ---
     function getRowCol(cell) {
@@ -646,6 +676,8 @@
       const eqRight = document.getElementById('eq-right');
       const eqResult = document.getElementById('eq-result');
       const slider = document.getElementById('difficulty-slider');
+      const tabHandles = document.querySelectorAll('.tab-handle');
+      const closeButtons = document.querySelectorAll('.panel-close');
 
       function bindEqInput(input, part) {
         input.addEventListener('focus', () => {
@@ -680,6 +712,12 @@
           setDifficulty(map[e.target.value]);
         });
       }
+
+      tabHandles.forEach(handle => {
+        handle.addEventListener('click', () => OPEN_SIDE_PANEL(handle.dataset.target));
+      });
+
+      closeButtons.forEach(button => button.addEventListener('click', CLOSE_SIDE_PANELS));
 
       rotateBtn.addEventListener('click', () => {
         dotsRotated = !dotsRotated;
