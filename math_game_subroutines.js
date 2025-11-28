@@ -14,16 +14,31 @@
         );
       }
 
+      function EMIT_EQUATION_UPDATE(eq) {
+        document.dispatchEvent(
+          new CustomEvent('equation-updated', { detail: { equation: eq || null } })
+        );
+      }
+
       const colorMap = {
-        1: "#b6e1ff",
-        2: "#86e6d6",
-        3: "#9acbff",
-        4: "#c8e6ff",
-        5: "#ffdba4",
-        6: "#f4b6ce",
-        7: "#d5e3ff",
-        8: "#a8ead0",
-        9: "#ffe7ae"
+        1: "#7fc8f7",
+        2: "#64d8cb",
+        3: "#7fb7ff",
+        4: "#9ad8ff",
+        5: "#f6c177",
+        6: "#f2a5c4",
+        7: "#b3d4ff",
+        8: "#8bd8b1",
+        9: "#f3d999"
+        1: "#9ed8ff",
+        2: "#7bd5f5",
+        3: "#a5b4fc",
+        4: "#b7f0e5",
+        5: "#f4d35e",
+        6: "#f2c6de",
+        7: "#c6ddff",
+        8: "#92eac0",
+        9: "#f6bd7b"
       };
 
     function CLOSE_SIDE_PANELS() {
