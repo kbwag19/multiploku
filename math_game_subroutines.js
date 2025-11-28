@@ -24,6 +24,32 @@
         7: "#c7d9ff",
         8: "#7ed8a8",
         9: "#ffdcbc"
+
+      function EMIT_EQUATION_UPDATE(eq) {
+        document.dispatchEvent(
+          new CustomEvent('equation-updated', { detail: { equation: eq || null } })
+        );
+      }
+
+      const colorMap = {
+        1: "#7fc8f7",
+        2: "#64d8cb",
+        3: "#7fb7ff",
+        4: "#9ad8ff",
+        5: "#f6c177",
+        6: "#f2a5c4",
+        7: "#b3d4ff",
+        8: "#8bd8b1",
+        9: "#f3d999"
+        1: "#9ed8ff",
+        2: "#7bd5f5",
+        3: "#a5b4fc",
+        4: "#b7f0e5",
+        5: "#f4d35e",
+        6: "#f2c6de",
+        7: "#c6ddff",
+        8: "#92eac0",
+        9: "#f6bd7b"
       };
 
     function CLOSE_SIDE_PANELS() {
