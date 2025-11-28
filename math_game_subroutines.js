@@ -23,6 +23,15 @@
         7: "#b3d4ff",
         8: "#8bd8b1",
         9: "#f3d999"
+        1: "#9ed8ff",
+        2: "#7bd5f5",
+        3: "#a5b4fc",
+        4: "#b7f0e5",
+        5: "#f4d35e",
+        6: "#f2c6de",
+        7: "#c6ddff",
+        8: "#92eac0",
+        9: "#f6bd7b"
       };
 
     // --- Utility Functions ---
