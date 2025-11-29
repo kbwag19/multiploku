@@ -121,6 +121,7 @@
     }
 
     .cell {
+      padding: 0;
       border: 1px solid var(--cell-border);
       background: var(--cell);
       color: var(--text);
@@ -129,6 +130,8 @@
       align-items: center;
       font-weight: bold;
       font-size: 18px;
+      border-radius: 8px;
+      box-shadow: inset 0 1px 0 #ffffff10, 0 2px 0 #0a121970;
       transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
       position: relative;
       cursor: pointer;
@@ -245,7 +248,23 @@
       flex-wrap: wrap;
     }
 
-    button {
+    .top-controls {
+      margin-bottom: 16px;
+      justify-content: space-between;
+      background: var(--panel);
+      border: 1px solid var(--cell-border);
+      padding: 12px;
+      border-radius: 10px;
+      flex-wrap: wrap;
+    }
+
+    .controls-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button:not(.cell) {
       padding: 10px 18px;
       font-size: 14px;
       cursor: pointer;
@@ -257,8 +276,8 @@
       transition: background 0.2s ease, transform 0.1s ease;
     }
 
-    button:hover { background: var(--accent-strong); }
-    button:active { transform: translateY(1px); }
+    button:not(.cell):hover { background: var(--accent-strong); }
+    button:not(.cell):active { transform: translateY(1px); }
     .button-active { background: #1f4631; color: #e9ffef; }
 
     .difficulty-container {
@@ -286,6 +305,16 @@
   </nav>
 
   <div class="game-wrapper">
+    <div class="controls top-controls">
+      <div class="controls-group">
+        <button onclick="generateGrid(currentDifficulty)">Start / New Game</button>
+        <button id="checkBtn" onclick="toggleValidation()">Check Answers</button>
+      </div>
+      <div class="difficulty-container">
+        <input type="range" id="difficulty-slider" min="1" max="3" step="1" value="1">
+        <span class="difficulty-label" id="difficulty-label">Beginner</span>
+      </div>
+    </div>
     <div class="board-wrapper">
       <div class="grid-container">
         <div class="container" id="puzzle-container">
@@ -305,15 +334,6 @@
           <div id="x-axis-label" class="axis-label x-label"></div>
         </div>
       </div>
-    </div>
-  </div>
-
-  <div class="controls">
-    <button onclick="generateGrid(currentDifficulty)">Start / New Game</button>
-    <button id="checkBtn" onclick="toggleValidation()">Check Answers</button>
-    <div class="difficulty-container">
-      <input type="range" id="difficulty-slider" min="1" max="3" step="1" value="1">
-      <span class="difficulty-label" id="difficulty-label">Beginner</span>
     </div>
   </div>
 
