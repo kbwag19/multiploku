@@ -212,6 +212,7 @@
         validateSingleCell(cell);
       }
       updateEquationVisual(eq);
+      EMIT_EQUATION_UPDATE(eq);
     }
 
     // --- Difficulty Management ---
@@ -299,6 +300,7 @@
       hideCellsStrategically(settings.hideTotal);
 
       UpdateEquationInputState();
+      EMIT_EQUATION_UPDATE(null);
     }
 
     function defineEquations(grid) {
@@ -418,6 +420,7 @@
             UpdateEquationFields(getActiveEquation());
             UpdateEquationInputState();
             updateEquationVisual(getActiveEquation());
+            EMIT_EQUATION_UPDATE(getActiveEquation());
           });
         }
       });
@@ -448,6 +451,7 @@
       UpdateEquationFields(getActiveEquation());
       UpdateEquationInputState();
       updateEquationVisual(getActiveEquation());
+      EMIT_EQUATION_UPDATE(getActiveEquation());
     }
 
     function toggleValidation() {
@@ -572,6 +576,7 @@
       UpdateEquationFields(null);
       UpdateEquationInputState();
       updateEquationVisual(null);
+      EMIT_EQUATION_UPDATE(null);
     }
 
     function activateEquation(eq) {
@@ -585,6 +590,7 @@
       UpdateEquationFields(eq);
       UpdateEquationInputState();
       updateEquationVisual(eq);
+      EMIT_EQUATION_UPDATE(eq);
     }
 
     function setActiveCell(cell) {
@@ -620,6 +626,7 @@
       document.getElementById('eq-result').value = '';
       updateEquationVisual(null);
       UpdateEquationInputState();
+      EMIT_EQUATION_UPDATE(null);
 
       if (!isCellVisible(cell)) {
         const input = cell.querySelector('input');
