@@ -262,6 +262,22 @@
       flex-wrap: wrap;
     }
 
+    .top-controls {
+      margin-bottom: 16px;
+      justify-content: space-between;
+      background: var(--panel);
+      border: 1px solid var(--cell-border);
+      padding: 12px;
+      border-radius: 10px;
+      flex-wrap: wrap;
+    }
+
+    .controls-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
     button {
       padding: 10px 18px;
       font-size: 14px;
@@ -303,6 +319,16 @@
   </nav>
 
   <div class="game-wrapper">
+    <div class="controls top-controls">
+      <div class="controls-group">
+        <button onclick="generateGrid(currentDifficulty)">Start / New Game</button>
+        <button id="checkBtn" onclick="toggleValidation()">Check Answers</button>
+      </div>
+      <div class="difficulty-container">
+        <input type="range" id="difficulty-slider" min="1" max="3" step="1" value="1">
+        <span class="difficulty-label" id="difficulty-label">Beginner</span>
+      </div>
+    </div>
     <div class="board-wrapper">
       <div class="grid-container">
         <div class="container" id="puzzle-container">
@@ -322,15 +348,6 @@
           <div id="x-axis-label" class="axis-label x-label"></div>
         </div>
       </div>
-    </div>
-  </div>
-
-  <div class="controls">
-    <button onclick="generateGrid(currentDifficulty)">Start / New Game</button>
-    <button id="checkBtn" onclick="toggleValidation()">Check Answers</button>
-    <div class="difficulty-container">
-      <input type="range" id="difficulty-slider" min="1" max="3" step="1" value="1">
-      <span class="difficulty-label" id="difficulty-label">Beginner</span>
     </div>
   </div>
 
