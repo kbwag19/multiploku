@@ -8,15 +8,41 @@
       let dotsRotated = false;
 
       const colorMap = {
-        1: "#e7e987",
-        2: "#17b1bc",
-        3: "#e57f65",
-        4: "#d6d260",
-        5: "#ce5b9f",
-        6: "#b3d8da",
-        7: "#e7e987",
-        8: "#17b1bc",
-        9: "#e57f65"
+        1: "#5da9f6",
+        2: "#5fc6c6",
+        3: "#7ec6ff",
+        4: "#a9d6ff",
+        5: "#ffd38a",
+        6: "#f5a7c2",
+        7: "#c7d9ff",
+        8: "#7ed8a8",
+        9: "#ffdcbc"
+
+      function EMIT_EQUATION_UPDATE(eq) {
+        document.dispatchEvent(
+          new CustomEvent('equation-updated', { detail: { equation: eq || null } })
+        );
+      }
+
+      const colorMap = {
+        1: "#7fc8f7",
+        2: "#64d8cb",
+        3: "#7fb7ff",
+        4: "#9ad8ff",
+        5: "#f6c177",
+        6: "#f2a5c4",
+        7: "#b3d4ff",
+        8: "#8bd8b1",
+        9: "#f3d999"
+        1: "#9ed8ff",
+        2: "#7bd5f5",
+        3: "#a5b4fc",
+        4: "#b7f0e5",
+        5: "#f4d35e",
+        6: "#f2c6de",
+        7: "#c6ddff",
+        8: "#92eac0",
+        9: "#f6bd7b"
       };
 
     // --- Utility Functions ---
@@ -212,6 +238,7 @@
         validateSingleCell(cell);
       }
       updateEquationVisual(eq);
+      EMIT_EQUATION_UPDATE(eq);
     }
 
     // --- Difficulty Management ---
@@ -292,6 +319,7 @@
       hideCellsStrategically(settings.hideTotal);
 
       UpdateEquationInputState();
+      EMIT_EQUATION_UPDATE(null);
     }
 
     function defineEquations(grid) {
@@ -405,6 +433,7 @@
             UpdateEquationFields(getActiveEquation());
             UpdateEquationInputState();
             updateEquationVisual(getActiveEquation());
+            EMIT_EQUATION_UPDATE(getActiveEquation());
           });
         }
       });
@@ -435,6 +464,7 @@
       UpdateEquationFields(getActiveEquation());
       UpdateEquationInputState();
       updateEquationVisual(getActiveEquation());
+      EMIT_EQUATION_UPDATE(getActiveEquation());
     }
 
     function toggleValidation() {
@@ -559,6 +589,7 @@
       UpdateEquationFields(null);
       UpdateEquationInputState();
       updateEquationVisual(null);
+      EMIT_EQUATION_UPDATE(null);
     }
 
     function activateEquation(eq) {
@@ -572,6 +603,7 @@
       UpdateEquationFields(eq);
       UpdateEquationInputState();
       updateEquationVisual(eq);
+      EMIT_EQUATION_UPDATE(eq);
     }
 
     function setActiveCell(cell) {
@@ -607,6 +639,7 @@
       document.getElementById('eq-result').value = '';
       updateEquationVisual(null);
       UpdateEquationInputState();
+      EMIT_EQUATION_UPDATE(null);
 
       if (!isCellVisible(cell)) {
         const input = cell.querySelector('input');
