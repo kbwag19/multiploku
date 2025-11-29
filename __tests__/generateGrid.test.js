@@ -5,7 +5,11 @@ const path = require('path');
 async function loadDom() {
   const htmlPath = path.join(__dirname, '../multiploku_June12B.html');
   const html = fs.readFileSync(htmlPath, 'utf8');
-  const dom = new JSDOM(html, { runScripts: 'dangerously' });
+  const dom = new JSDOM(html, {
+    runScripts: 'dangerously',
+    resources: 'usable',
+    url: 'file://' + path.join(__dirname, '../multiploku_June12B.html')
+  });
   // wait for DOMContentLoaded handlers
   await new Promise(resolve => {
     if (dom.window.document.readyState === 'complete') {
