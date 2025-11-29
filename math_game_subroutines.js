@@ -8,15 +8,15 @@
       let dotsRotated = false;
 
       const colorMap = {
-        1: "#e7e987",
-        2: "#17b1bc",
-        3: "#e57f65",
-        4: "#d6d260",
-        5: "#ce5b9f",
-        6: "#b3d8da",
-        7: "#e7e987",
-        8: "#17b1bc",
-        9: "#e57f65"
+        1: "#1f2f3d",
+        2: "#23384a",
+        3: "#274156",
+        4: "#2b4b63",
+        5: "#305470",
+        6: "#355e7d",
+        7: "#3a688a",
+        8: "#3f7297",
+        9: "#457ca3"
       };
 
     // --- Utility Functions ---
@@ -269,12 +269,12 @@
             cell.classList.add('factor');
             value = topFactors[col - 1];
             cell.style.background = colorMap[value];
-            cell.style.color = '#121212';
+            cell.style.color = '#e8f7ff';
           } else if (col === 0) {
             cell.classList.add('factor');
             value = leftFactors[row - 1];
             cell.style.background = colorMap[value];
-            cell.style.color = '#121212';
+            cell.style.color = '#e8f7ff';
           } else {
             value = topFactors[col - 1] * leftFactors[row - 1];
           }
