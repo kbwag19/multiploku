@@ -8,41 +8,15 @@
       let dotsRotated = false;
 
       const colorMap = {
-        1: "#5da9f6",
-        2: "#5fc6c6",
-        3: "#7ec6ff",
-        4: "#a9d6ff",
-        5: "#ffd38a",
-        6: "#f5a7c2",
-        7: "#c7d9ff",
-        8: "#7ed8a8",
-        9: "#ffdcbc"
-
-      function EMIT_EQUATION_UPDATE(eq) {
-        document.dispatchEvent(
-          new CustomEvent('equation-updated', { detail: { equation: eq || null } })
-        );
-      }
-
-      const colorMap = {
-        1: "#7fc8f7",
-        2: "#64d8cb",
-        3: "#7fb7ff",
-        4: "#9ad8ff",
-        5: "#f6c177",
-        6: "#f2a5c4",
-        7: "#b3d4ff",
-        8: "#8bd8b1",
-        9: "#f3d999"
-        1: "#9ed8ff",
-        2: "#7bd5f5",
-        3: "#a5b4fc",
-        4: "#b7f0e5",
-        5: "#f4d35e",
-        6: "#f2c6de",
-        7: "#c6ddff",
-        8: "#92eac0",
-        9: "#f6bd7b"
+        1: "#1f2f3d",
+        2: "#23384a",
+        3: "#274156",
+        4: "#2b4b63",
+        5: "#305470",
+        6: "#355e7d",
+        7: "#3a688a",
+        8: "#3f7297",
+        9: "#457ca3"
       };
 
     // --- Utility Functions ---
@@ -296,12 +270,12 @@
             cell.classList.add('factor');
             value = topFactors[col - 1];
             cell.style.background = colorMap[value];
-            cell.style.color = '#121212';
+            cell.style.color = '#e8f7ff';
           } else if (col === 0) {
             cell.classList.add('factor');
             value = leftFactors[row - 1];
             cell.style.background = colorMap[value];
-            cell.style.color = '#121212';
+            cell.style.color = '#e8f7ff';
           } else {
             value = topFactors[col - 1] * leftFactors[row - 1];
           }
