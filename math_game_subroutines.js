@@ -8,15 +8,15 @@
       let dotsRotated = false;
 
       const colorMap = {
-        1: "#e7e987",
-        2: "#17b1bc",
-        3: "#e57f65",
-        4: "#d6d260",
-        5: "#ce5b9f",
-        6: "#b3d8da",
-        7: "#e7e987",
-        8: "#17b1bc",
-        9: "#e57f65"
+        1: "#1f2f3d",
+        2: "#23384a",
+        3: "#274156",
+        4: "#2b4b63",
+        5: "#305470",
+        6: "#355e7d",
+        7: "#3a688a",
+        8: "#3f7297",
+        9: "#457ca3"
       };
 
     // --- Utility Functions ---
@@ -260,23 +260,30 @@
         for (let col = 0; col < 4; col++) {
           const cell = document.createElement('div');
           cell.classList.add('cell');
+          cell.setAttribute('role', 'button');
+          cell.tabIndex = 0;
           let value = '';
 
           if (row === 0 && col === 0) {
             cell.classList.add('null');
+            cell.removeAttribute('role');
+            cell.tabIndex = -1;
             value = 'X';
           } else if (row === 0) {
             cell.classList.add('factor');
             value = topFactors[col - 1];
             cell.style.background = colorMap[value];
-            cell.style.color = '#121212';
+            cell.style.color = '#e8f7ff';
+            cell.setAttribute('aria-label', `Top factor ${value}`);
           } else if (col === 0) {
             cell.classList.add('factor');
             value = leftFactors[row - 1];
             cell.style.background = colorMap[value];
-            cell.style.color = '#121212';
+            cell.style.color = '#e8f7ff';
+            cell.setAttribute('aria-label', `Left factor ${value}`);
           } else {
             value = topFactors[col - 1] * leftFactors[row - 1];
+            cell.setAttribute('aria-label', `Product ${value}`);
           }
 
           cell.textContent = value;
@@ -383,8 +390,14 @@
         const cell = obj.element;
         if (cell) {
           cell.classList.add('hidden');
-          cell.innerHTML = '<input type="text" maxlength="5">';
-          const input = cell.querySelector('input');
+          cell.removeAttribute('role');
+          cell.tabIndex = -1;
+          cell.innerHTML = '';
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.maxLength = 5;
+          input.setAttribute('aria-label', `Enter value for row ${obj.row} column ${obj.col}`);
+          cell.appendChild(input);
 
           input.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
@@ -685,15 +698,26 @@
         let target = e.target;
         if (target.tagName === 'INPUT') target = target.parentElement;
         const cell = target.closest('.cell');
-        
+
         if (!cell) return;
-        
+
         const isCommandClick = e.ctrlKey || e.metaKey;
-        
+
         if (isProductCell(cell)) {
           handleProductCellClick(cell, isCommandClick);
         } else if (isFactorCell(cell)) {
           handleFactorCellClick(cell, isCommandClick);
+        }
+      });
+
+      grid.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT') return;
+        const cell = e.target.closest('.cell');
+        if (!cell) return;
+
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          cell.click();
         }
       });
 
@@ -704,3 +728,4 @@
     });
 
 window.generateGrid = generateGrid;
+window.toggleValidation = toggleValidation;

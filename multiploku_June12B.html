@@ -3,108 +3,140 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Math Grid Game</title>
-    <style>
+  <title>Multiploku</title>
+  <style>
+    :root {
+      --bg: #0f161d;
+      --panel: #16222c;
+      --panel-strong: #1d2c38;
+      --cell: #22303b;
+      --cell-border: #30414e;
+      --cell-muted: #152028;
+      --accent: #00e0ff;
+      --accent-strong: #00c5e0;
+      --text: #e7f4ff;
+      --muted: #a8c2d6;
+      --correct: #2c8f61;
+      --incorrect: #b83f4b;
+    }
+
+    * { box-sizing: border-box; }
+
     body {
       margin: 0;
-      padding: 40px 0 0 0;
+      padding: 48px 12px 12px;
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-items: center;
-      height: 100vh;
-      background: #121212;
-      color: #b3d8da;
+      background: var(--bg);
+      color: var(--text);
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
+
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 48px;
+      background: var(--accent);
+      color: #0a1219;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 16px;
+      font-family: 'Arial Black', sans-serif;
+      z-index: 1000;
+      box-shadow: 0 2px 10px #00000040;
+    }
+
+    .nav-title { font-size: 20px; }
+
+    .nav-buttons .nav-btn {
+      background: #0a1219;
+      color: var(--accent);
+      margin-left: 8px;
+      border: 2px solid var(--accent);
+      border-radius: 6px;
+      padding: 8px 14px;
+      font-weight: bold;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .nav-buttons .nav-btn:hover {
+      background: var(--accent-strong);
+      border-color: var(--accent-strong);
+      color: #0a1219;
+    }
+
+    .game-wrapper {
+      width: 100%;
+      max-width: 1180px;
+    }
+
+    .board-wrapper {
+      background: var(--panel);
+      border: 1px solid var(--cell-border);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 12px 30px #00000050;
+    }
+
     .grid-container {
       display: grid;
-      grid-template-columns: auto minmax(620px, auto);
-      gap: 20px;
-      width: 100%;
-      max-width: 1200px;
-      margin: 0 auto;
-      align-items: flex-start; /* align top edges of grid and panels */
+      grid-template-columns: minmax(360px, 1fr) minmax(320px, 1fr);
+      grid-template-rows: auto auto;
+      grid-template-areas:
+        "puzzle equation"
+        "puzzle visual";
+      gap: 16px;
+      align-items: start;
     }
 
-    #puzzle-container {
-      display: flex;
-      align-items: flex-start;
-    }
+    #puzzle-container { grid-area: puzzle; display: flex; justify-content: center; }
+    #equation-panel { grid-area: equation; display: flex; flex-direction: column; gap: 12px; }
+    #visual-container { grid-area: visual; position: relative; min-height: 260px; }
 
-    #side-panel {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      min-width: 320px;
-    }
-
-    .equation-container,
-    #visual-container {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      padding: 16px;
-    }
     .container {
-      background: #1e1e1e;
-      border: none;
-      border-radius: 12px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
+      background: var(--panel-strong);
+      border: 1px solid var(--cell-border);
+      border-radius: 10px;
+      padding: 12px;
+      box-shadow: inset 0 1px 0 #ffffff10;
     }
+
     .center-grid {
       width: 100%;
-      max-width: 360px;
-      height: auto;
+      max-width: 380px;
+      aspect-ratio: 1 / 1;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       grid-template-rows: repeat(4, 1fr);
       gap: 2px;
       padding: 4px;
-      background: #2a2a2a;
-      border: none;
-      border-radius: 0;
+      background: var(--panel);
+      border: 1px solid var(--cell-border);
+      border-radius: 6px;
     }
-    .center-grid {
-      aspect-ratio: 1 / 1;
-    }
-    /* Base button style for all cells */
+
     .cell {
+      border: 1px solid var(--cell-border);
+      background: var(--cell);
+      color: var(--text);
       display: flex;
       justify-content: center;
       align-items: center;
       font-weight: bold;
       font-size: 18px;
-      color: #b3d8da;
-      transition: all 0.2s ease;
+      transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
       position: relative;
       cursor: pointer;
-      /* Raised minesweeper button look */
-      border-top: 3px solid #7a7a7a;
-      border-left: 3px solid #7a7a7a;
-      border-right: 3px solid #3a3a3a;
-      border-bottom: 3px solid #3a3a3a;
-      background: linear-gradient(135deg, #5a5a5a 0%, #4a4a4a 50%, #3a3a3a 100%);
     }
-    
-    /* Factor cells - slightly different coloring but same button structure */
-    .cell.factor {
-      background: linear-gradient(135deg, #4a5a5a 0%, #3a4a4a 50%, #2a3a3a 100%);
-      color: #17b1bc;
-      text-shadow: 0 0 3px #17b1bc60;
-    }
-    
-    /* Null cell (top-left) - same as products */
-    .cell.null {
-      background: linear-gradient(135deg, #5a5a5a 0%, #4a4a4a 50%, #3a3a3a 100%);
-      color: #b3d8da;
-    }
-    
-    /* Input styling for hidden cells */
+
+    .cell.factor { background: #1b2733; color: #e8f7ff; }
+    .cell.null { background: var(--panel); color: var(--muted); }
+
     .cell input {
       width: 100%;
       height: 100%;
@@ -113,264 +145,52 @@
       text-align: center;
       border: none;
       background: transparent;
-      color: inherit;
+      color: #7cf5ff;
       outline: none;
     }
 
-    /* Pressed state for cells in active equation (non-active cells) */
-    .cell.highlight {
-      border-top: 2px solid #2a2a2a;
-      border-left: 2px solid #2a2a2a;
-      border-right: 2px solid #5a5a5a;
-      border-bottom: 2px solid #5a5a5a;
-      background: linear-gradient(135deg, #3a3a3a 0%, #4a4a4a 50%, #5a5a5a 100%);
-      transform: translateY(1px);
-    }
-    
-    /* Factor cells when pressed */
-    .cell.factor.highlight {
-      background: linear-gradient(135deg, #2a3a3a 0%, #3a4a4a 50%, #4a5a5a 100%);
-      color: #ce5b9f;
-    }
+    .cell.hidden { background: var(--cell-muted); color: #7cf5ff; cursor: text; }
+    .cell:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; }
 
-    /* Deep pressed state for the active cell */
-    .cell.active-cell {
-      border-top: 2px solid #1a1a1a;
-      border-left: 2px solid #1a1a1a;
-      border-right: 2px solid #6a6a6a;
-      border-bottom: 2px solid #6a6a6a;
-      background: linear-gradient(135deg, #2a2a2a 0%, #3a3a3a 50%, #4a4a4a 100%);
-      transform: translateY(2px);
-      box-shadow: inset 0 0 8px #00000040;
-    }
-    
-    /* Factor cells when active */
-    .cell.factor.active-cell {
-      background: linear-gradient(135deg, #1a2a2a 0%, #2a3a3a 50%, #3a4a4a 100%);
-      color: #e57f65;
-    }
+    .cell.highlight { box-shadow: 0 0 10px #00ffff55; background: #1c2a35; }
+    .cell.active-cell { outline: 2px solid var(--accent); outline-offset: -3px; background: #1a3b49; }
+    .cell.factor-selected { outline: 2px solid var(--accent); outline-offset: -3px; background: #1a3b49; }
+    .cell.selected { outline: 2px solid var(--accent); outline-offset: -3px; background: #1a3b49; }
 
-        /* Single factor cell selection (waiting for equation activation) */
-    .cell.factor-selected {
-      border-top: 2px solid #1a2a2a;
-      border-left: 2px solid #1a2a2a;
-      border-right: 2px solid #6a6a6a;
-      border-bottom: 2px solid #6a6a6a;
-      background: linear-gradient(135deg, #1a2a2a 0%, #2a3a3a 50%, #3a4a4a 100%);
-      color: #17b1bc;
-      text-shadow: 0 0 5px #17b1bc80;
-      box-shadow: 0 0 8px #17b1bc40, inset 0 0 8px #00000040;
-      transform: translateY(2px);
-    }
-
-    /* Ensure factor-selected always gets pressed-in effect regardless of other classes */
-    .cell.factor.factor-selected {
-      border-top: 2px solid #1a2a2a !important;
-      border-left: 2px solid #1a2a2a !important;
-      border-right: 2px solid #6a6a6a !important;
-      border-bottom: 2px solid #6a6a6a !important;
-      background: linear-gradient(135deg, #1a2a2a 0%, #2a3a3a 50%, #3a4a4a 100%) !important;
-      transform: translateY(2px) !important;
-    }
-
-    /* Validation states */
-    .cell.correct {
-      background: linear-gradient(135deg, #17b1bc 0%, #b3d8da 50%, #d6d260 100%) !important;
-      border-top: 3px solid #17b1bc;
-      border-left: 3px solid #17b1bc;
-      border-right: 3px solid #d6d260;
-      border-bottom: 3px solid #d6d260;
-      box-shadow: inset 0 0 10px #17b1bc30;
-      text-shadow: 0 0 5px #17b1bc80;
-    } 
-    .cell.incorrect {
-      background: linear-gradient(135deg, #ce5b9f 0%, #e57f65 50%, #ce5b9f 100%) !important;
-      border-top: 3px solid #ce5b9f;
-      border-left: 3px solid #ce5b9f;
-      border-right: 3px solid #e57f65;
-      border-bottom: 3px solid #e57f65;
-      box-shadow: inset 0 0 10px #ce5b9f30;
-      text-shadow: 0 0 5px #ce5b9f80;
-    }
-
-    .controls {
-      margin-top: 20px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-    }
-    .difficulty-container {
-      display: flex;
-      align-items: center;
-      background: #e7e987;
-      color: #17b1bc;
-      padding: 10px 20px;
-      border-radius: 6px;
-      margin: 0 5px;
-    }
-    .difficulty-container input[type=range] {
-      width: 100px;
-    }
-    .difficulty-label {
-      font-size: 14px;
-      color: #17b1bc;
-      margin-left: 8px;
-      margin-bottom: 0;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 14px;
-      cursor: pointer;
-      background: #e57f65;
-      color: #e7e987;
-      border: none;
-      margin: 0 5px;
-      font-weight: bold;
-      border-radius: 6px;
-      transition: background 0.3s;
-    }
-    button:hover {
-      background: #ce5b9f;
-    }
-
-    .button-active {
-      background: #d6d260;
-    }
-
-    .navbar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 45px;
-      background: #17b1bc;
-      color: #e7e987;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-sizing: border-box;
-      font-family: 'Arial Black', sans-serif;
-      z-index: 1000;
-      padding: 0 1rem;
-    }
-
-    .nav-title {
-      font-size: 20px;
-      font-weight: bold;
-    }
-
-    .nav-buttons .nav-btn {
-      background: #d6d260;
-      color: #17b1bc;
-      margin-left: 10px;
-      border: 2px solid #17b1bc;
-      border-radius: 6px;
-      padding: 8px 16px;
-      font-weight: bold;
-      transition: all 0.3s ease;
-    }
-
-    .nav-buttons .nav-btn:hover {
-      background: #ce5b9f;
-      border-color: #ce5b9f;
-      color: #e7e987;
-    }
-
-    .game-wrapper {
-      padding-top: 50px; /* bring closer to navbar */
-      margin-bottom: 30px; /* extra space above controls */
-    }
-
-    .board-wrapper {
-      background: #1e1e1e;
-      border: none;
-      border-radius: 16px;
-      padding: 32px;
-      display: inline-block;
-    }
+    .cell.correct { background: #1f4631 !important; border-color: #2f8159; box-shadow: inset 0 0 10px #2f815980; }
+    .cell.incorrect { background: #43202b !important; border-color: #b83f4b; box-shadow: inset 0 0 10px #b83f4b80; }
 
     .equation-display {
       display: grid;
       grid-template-columns: 1fr auto 1fr auto 1fr;
-      grid-template-rows: 1fr;
       gap: 8px;
       align-items: center;
       justify-items: center;
       font-size: 20px;
-      color: #b3d8da;
-      width: 100%;
-      height: 100%;
-      padding: 12px;
-      box-sizing: border-box;
-      margin: 0 auto;
+      color: var(--text);
     }
-    
+
     .eq-box {
-      width: 40px;
-      height: 40px;
+      width: 52px;
+      height: 52px;
       font-size: 18px;
       font-weight: bold;
       text-align: center;
-      border: none;
+      border: 1px solid var(--cell-border);
+      background: var(--cell);
+      color: var(--text);
+      border-radius: 6px;
       outline: none;
-      
-      /* Match grid cell styling */
-      border-top: 3px solid #7a7a7a;
-      border-left: 3px solid #7a7a7a;
-      border-right: 3px solid #3a3a3a;
-      border-bottom: 3px solid #3a3a3a;
-      background: linear-gradient(135deg, #5a5a5a 0%, #4a4a4a 50%, #3a3a3a 100%);
-      color: #b3d8da;
-      cursor: pointer;
-      transition: all 0.2s ease;
     }
 
-    .eq-box[readonly] {
-      cursor: default;
-    }
-
-.eq-box.editable {
-      cursor: text;
-    }
-
-
-    .fraction {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      line-height: 1;
-    }
-
-    .fraction .frac-bar {
-      border-bottom: 2px solid #b3d8da;
-      width: 100%;
-      margin: 2px 0;
-    }
-
-    .fraction .num,
-    .fraction .den {
-      width: 100%;
-      text-align: center;
-    }
-    
-    .eq-operator {
-      font-weight: bold;
-      color: #17b1bc;
-      font-size: 20px;
-    }
+    .eq-box[readonly] { color: var(--muted); }
+    .eq-box.editable { color: #7cf5ff; }
 
     #visual-container {
-      position: relative;
-      min-height: 256px; /* align bottom with grid height */
-      min-width: 320px;
-      max-height: 450px;
-      overflow: auto;
-      padding: 10px;
-      box-sizing: border-box;
-      background: #2a2a2a;
-      border: none;
-      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--panel-strong);
     }
 
     #rotate-btn {
@@ -379,105 +199,81 @@
       right: 8px;
       background: transparent;
       border: none;
-      color: #17b1bc;
-      font-size: 24px;
+      color: var(--accent);
+      font-size: 22px;
       padding: 4px;
       cursor: pointer;
-      z-index: 10;
     }
 
-    #rotate-btn:hover {
-      color: #ce5b9f;
-    }
+    #rotate-btn:hover { color: var(--accent-strong); }
+
     .eq-visual {
       display: grid;
-      justify-content: center;
-      align-content: center;
       gap: 6px;
-      color: #17b1bc;
+      color: var(--muted);
       font-size: 14px;
       word-break: break-all;
-    }
-    .eq-visual.rotating {
-      transition: transform 0.5s ease;
-    }
-    .eq-visual.rotated {
-      transform: rotate(90deg);
     }
 
     .eq-visual .object {
       display: inline-block;
-      width: clamp(9.6px, 2.4vw, 19.2px);
-      height: clamp(9.6px, 2.4vw, 19.2px);
+      width: clamp(10px, 2.4vw, 18px);
+      height: clamp(10px, 2.4vw, 18px);
       border-radius: 50%;
-    }
-
-    .eq-visual .solve-msg {
-      font-family: 'Arial Black', sans-serif;
-      color: #17b1bc;
-      font-size: 18px;
-      text-align: center;
+      background: var(--accent);
     }
 
     .axis-label {
       position: absolute;
-      color: #17b1bc;
+      color: var(--muted);
       font-family: 'Arial Black', sans-serif;
       font-size: 14px;
       pointer-events: none;
       transition: opacity 0.3s ease;
     }
 
-    .x-label {
-      bottom: 16px;
-      left: 50%;
-      transform: translateX(-50%);
+    .x-label { bottom: 12px; left: 50%; transform: translateX(-50%); }
+    .y-label { left: 12px; top: 50%; transform: translateY(-50%); }
+    .axis-label.fading { opacity: 0; }
+
+    .controls {
+      margin-top: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
-    .y-label {
-      left: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      transform-origin: center;
+    button {
+      padding: 10px 18px;
+      font-size: 14px;
+      cursor: pointer;
+      background: var(--accent);
+      color: #0a1219;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      transition: background 0.2s ease, transform 0.1s ease;
     }
 
-    .axis-label.fading {
-      opacity: 0;
-    }
-    @keyframes circleAnim {
-      0% { box-shadow: 0 0 0 0 #17b1bc40; }
-      50% { box-shadow: 0 0 0 6px #17b1bc80; }
-      100% { box-shadow: 0 0 0 0 #17b1bc40; }
+    button:hover { background: var(--accent-strong); }
+    button:active { transform: translateY(1px); }
+    .button-active { background: #1f4631; color: #e9ffef; }
+
+    .difficulty-container {
+      display: flex;
+      align-items: center;
+      background: var(--panel-strong);
+      border: 1px solid var(--cell-border);
+      color: var(--text);
+      padding: 6px 12px;
+      border-radius: 8px;
+      gap: 8px;
     }
 
-    .cell.selected {
-      outline: 3px solid #17b1bc;
-      outline-offset: -2px;
-      background: linear-gradient(135deg, #e57f65 0%, #ce5b9f 50%, #b3d8da 100%) !important;
-      border-top: 3px solid #e57f65;
-      border-left: 3px solid #e57f65;
-      border-right: 3px solid #e57f65;
-      border-bottom: 3px solid #e57f65;
-      box-shadow: inset 0 0 10px #17b1bc40;
-    }
-
-    @keyframes pulse {
-      0% { 
-        box-shadow: 0 0 5px #17b1bc, inset 0 0 8px #17b1bc30;
-        border-top: 3px solid #b3d8da;
-        border-left: 3px solid #b3d8da;
-      }
-      50% { 
-        box-shadow: 0 0 15px #17b1bc, inset 0 0 12px #17b1bc40;
-        border-top: 3px solid #e57f65;
-        border-left: 3px solid #e57f65;
-      }
-      100% { 
-        box-shadow: 0 0 5px #17b1bc, inset 0 0 8px #17b1bc30;
-        border-top: 3px solid #b3d8da;
-        border-left: 3px solid #b3d8da;
-      }
-    }
+    .difficulty-container input[type=range] { width: 120px; }
+    .difficulty-label { font-size: 14px; color: var(--muted); }
   </style>
 </head>
 <body>
@@ -490,27 +286,26 @@
   </nav>
 
   <div class="game-wrapper">
-      <div class="board-wrapper">
-        <div class="grid-container">
-          <div class="container" id="visual-container">
-            <button id="rotate-btn" title="Rotate dots">&#8635;</button>
-            <div id="equation-visual" class="eq-visual" style="display:none;"></div>
-            <div id="y-axis-label" class="axis-label y-label"></div>
-            <div id="x-axis-label" class="axis-label x-label"></div>
+    <div class="board-wrapper">
+      <div class="grid-container">
+        <div class="container" id="puzzle-container">
+          <div class="center-grid" id="game-grid"></div>
+        </div>
+        <div class="container" id="equation-panel">
+          <div class="equation-display">
+            <input id="eq-left" type="text" class="eq-box"> x
+            <input id="eq-right" type="text" class="eq-box"> =
+            <input id="eq-result" type="text" class="eq-box">
           </div>
-          <div id="side-panel">
-            <div class="container equation-container">
-              <div class="equation-display">
-                <input id="eq-left" type="text" class="eq-box"> x
-                <input id="eq-right" type="text" class="eq-box"> =
-                <input id="eq-result" type="text" class="eq-box">
-              </div>
-            </div>
-            <div class="container" id="puzzle-container">
-              <div class="center-grid" id="game-grid"></div>
-            </div>
-          </div>
+        </div>
+        <div class="container" id="visual-container">
+          <button id="rotate-btn" title="Rotate dots">&#8635;</button>
+          <div id="equation-visual" class="eq-visual" style="display:none;"></div>
+          <div id="y-axis-label" class="axis-label y-label"></div>
+          <div id="x-axis-label" class="axis-label x-label"></div>
+        </div>
       </div>
+    </div>
   </div>
 
   <div class="controls">
@@ -522,7 +317,7 @@
     </div>
   </div>
 
-  <script src="clickProductCell.js"></script>
   <script src="math_game_subroutines.js"></script>
+  <script src="clickProductCell.js"></script>
 </body>
 </html>
