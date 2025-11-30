@@ -19,6 +19,10 @@
         9: "#457ca3"
       };
 
+      if (typeof window.EMIT_EQUATION_UPDATE !== 'function') {
+        window.EMIT_EQUATION_UPDATE = () => {};
+      }
+
     // --- Utility Functions ---
     function getRowCol(cell) {
       const index = [...cell.parentNode.children].indexOf(cell);
@@ -259,16 +263,16 @@
       // Create grid cells
       for (let row = 0; row < 4; row++) {
         for (let col = 0; col < 4; col++) {
-          const cell = document.createElement('div');
+          const cell = document.createElement('button');
+          cell.type = 'button';
           cell.classList.add('cell');
-          cell.setAttribute('role', 'button');
           cell.tabIndex = 0;
           let value = '';
 
           if (row === 0 && col === 0) {
             cell.classList.add('null');
-            cell.removeAttribute('role');
             cell.tabIndex = -1;
+            cell.disabled = true;
             value = 'X';
           } else if (row === 0) {
             cell.classList.add('factor');
@@ -301,6 +305,7 @@
 
       UpdateEquationInputState();
       EMIT_EQUATION_UPDATE(null);
+      window.cellElements = cellElements;
     }
 
     function defineEquations(grid) {
